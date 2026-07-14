@@ -149,3 +149,9 @@ pnpm build
 ```
 
 This builds all shared modules, runs Next.js builds, compiles TypeScript configuration pipelines, and outputs optimized builds into `.next` and `dist` targets.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions to the platform! Please read our [Contributing Guidelines](CONTRIBUTING.md) to learn about our branching workflow, coding standards, and testing procedures.
