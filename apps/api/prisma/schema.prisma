@@ -10,6 +10,7 @@ generator client {
 model User {
   id             String   @id @default(uuid())
   walletAddress  String   @unique
+  displayName    String?  // Optional user-set display name
   nonce          String?  // SEP-10 Auth Challenge Nonce
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -17,16 +18,24 @@ model User {
 }
 
 model Event {
-  id                    String   @id @default(uuid())
+  id                    String    @id @default(uuid())
   title                 String
   description           String
   date                  DateTime
-  price                 String   // String to handle large numbers (e.g. u128 / XLM scale)
+  endDate               DateTime? // Optional end date/time
+  location              String    // Venue / address / city
+  price                 String    // String to handle large numbers (e.g. u128 / XLM scale)
   capacity              Int
-  maxPremiumPctScaled   Int      // e.g. 150 for 15%
-  contractAddress       String?  // Soroban Contract ID
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  maxPremiumPctScaled   Int       // e.g. 150 for 15%
+  images                String[]  // Array of image URLs (multi-image support)
+  instructions          String?   // Entry instructions (dress code, ID requirements, etc.)
+  category              String?   // e.g. Music, Tech, Sports, Art
+  tags                  String[]  // Free-form tags
+  organizerAddress      String    // Wallet address of the event organizer
+  isPublished           Boolean   @default(false) // Whether visible on public listing
+  contractAddress       String?   // Soroban Contract ID
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
   tickets               Ticket[]
 }
 

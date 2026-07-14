@@ -1,5 +1,22 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiBody } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiBody,
+} from '@nestjs/swagger';
 import { EventsService } from './events.service';
 import { JwtGuard } from '../auth/jwt.guard';
 
@@ -8,30 +25,45 @@ import { JwtGuard } from '../auth/jwt.guard';
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
+  // ─── Events ──────────────────────────────────────────────────────────────────
+
   @Post()
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new ticket drop event' })
   async createEvent(
+    @Request() req: any,
     @Body()
     body: {
       title: string;
       description: string;
       date: string;
+      endDate?: string;
+      location: string;
       price: string;
       capacity: number;
       maxPremiumPctScaled: number;
+      images?: string[];
+      instructions?: string;
+      category?: string;
+      tags?: string[];
+      isPublished?: boolean;
       contractAddress?: string;
     },
   ) {
     return this.eventsService.createEvent({
       ...body,
       date: new Date(body.date),
+      endDate: body.endDate ? new Date(body.endDate) : undefined,
+      organizerAddress: req.user.address,
     });
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all ticket drop events' })
-  async getAllEvents() {
-    return this.eventsService.getAllEvents();
+  @ApiOperation({ summary: 'Get all published events, or filter by organizer wallet' })
+  @ApiQuery({ name: 'organizer', required: false, description: 'Filter events by organizer wallet address' })
+  async getAllEvents(@Query('organizer') organizer?: string) {
+    return this.eventsService.getAllEvents(organizer);
   }
 
   @Get('tickets')
@@ -47,16 +79,56 @@ export class EventsController {
     return this.eventsService.getEventById(id);
   }
 
+  @Patch(':id')
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update an event (organizer only)' })
+  async updateEvent(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body()
+    body: {
+      title?: string;
+      description?: string;
+      date?: string;
+      endDate?: string;
+      location?: string;
+      price?: string;
+      capacity?: number;
+      maxPremiumPctScaled?: number;
+      images?: string[];
+      instructions?: string;
+      category?: string;
+      tags?: string[];
+      isPublished?: boolean;
+      contractAddress?: string;
+    },
+  ) {
+    return this.eventsService.updateEvent(id, req.user.address, {
+      ...body,
+      date: body.date ? new Date(body.date) : undefined,
+      endDate: body.endDate ? new Date(body.endDate) : undefined,
+    });
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Unpublish/delete an event (organizer only)' })
+  async deleteEvent(@Param('id') id: string, @Request() req: any) {
+    return this.eventsService.deleteEvent(id, req.user.address);
+  }
+
+  // ─── Tickets ─────────────────────────────────────────────────────────────────
+
   @Post(':id/purchase')
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Purchase/mint a ticket for an event using signed Stellar Inner transaction' })
+  @ApiOperation({ summary: 'Purchase/mint a ticket for an event' })
   @ApiBody({
     schema: {
       type: 'object',
-      properties: {
-        xdr: { type: 'string', description: 'Signed user minting transaction XDR' },
-      },
+      properties: { xdr: { type: 'string', description: 'Signed user minting transaction XDR' } },
       required: ['xdr'],
     },
   })
@@ -75,9 +147,7 @@ export class EventsController {
   @ApiBody({
     schema: {
       type: 'object',
-      properties: {
-        toAddress: { type: 'string', description: 'Wallet address of the recipient' },
-      },
+      properties: { toAddress: { type: 'string', description: 'Recipient wallet address' } },
       required: ['toAddress'],
     },
   })
@@ -87,7 +157,12 @@ export class EventsController {
     @Request() req: any,
     @Body() body: { toAddress: string },
   ) {
-    return this.eventsService.transferTicket(eventId, parseInt(ticketId), req.user.address, body.toAddress);
+    return this.eventsService.transferTicket(
+      eventId,
+      parseInt(ticketId),
+      req.user.address,
+      body.toAddress,
+    );
   }
 
   @Post(':eventId/tickets/:ticketId/verify')
@@ -95,9 +170,7 @@ export class EventsController {
   @ApiBody({
     schema: {
       type: 'object',
-      properties: {
-        ownerAddress: { type: 'string', description: 'Wallet address of the ticket holder' },
-      },
+      properties: { ownerAddress: { type: 'string', description: 'Wallet address of the ticket holder' } },
       required: ['ownerAddress'],
     },
   })

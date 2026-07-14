@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { StellarService } from '../stellar/stellar.service';
 
@@ -13,20 +18,77 @@ export class EventsService {
     title: string;
     description: string;
     date: Date;
+    endDate?: Date;
+    location: string;
     price: string;
     capacity: number;
     maxPremiumPctScaled: number;
+    images?: string[];
+    instructions?: string;
+    category?: string;
+    tags?: string[];
+    organizerAddress: string;
+    isPublished?: boolean;
     contractAddress?: string;
   }) {
+    // Ensure organizer has a user record
+    await this.prisma.user.upsert({
+      where: { walletAddress: data.organizerAddress },
+      update: {},
+      create: { walletAddress: data.organizerAddress },
+    });
+
     return this.prisma.event.create({ data });
   }
 
-  async getAllEvents() {
+  async updateEvent(
+    id: string,
+    organizerAddress: string,
+    data: {
+      title?: string;
+      description?: string;
+      date?: Date;
+      endDate?: Date;
+      location?: string;
+      price?: string;
+      capacity?: number;
+      maxPremiumPctScaled?: number;
+      images?: string[];
+      instructions?: string;
+      category?: string;
+      tags?: string[];
+      isPublished?: boolean;
+      contractAddress?: string;
+    },
+  ) {
+    const event = await this.prisma.event.findUnique({ where: { id } });
+    if (!event) throw new NotFoundException('Event not found');
+    if (event.organizerAddress !== organizerAddress) {
+      throw new ForbiddenException('Only the event organizer can update this event');
+    }
+    return this.prisma.event.update({ where: { id }, data });
+  }
+
+  async deleteEvent(id: string, organizerAddress: string) {
+    const event = await this.prisma.event.findUnique({ where: { id } });
+    if (!event) throw new NotFoundException('Event not found');
+    if (event.organizerAddress !== organizerAddress) {
+      throw new ForbiddenException('Only the event organizer can delete this event');
+    }
+    // Soft-delete by unpublishing
+    return this.prisma.event.update({
+      where: { id },
+      data: { isPublished: false },
+    });
+  }
+
+  async getAllEvents(organizerAddress?: string) {
     return this.prisma.event.findMany({
+      where: {
+        ...(organizerAddress ? { organizerAddress } : { isPublished: true }),
+      },
       include: {
-        _count: {
-          select: { tickets: true },
-        },
+        _count: { select: { tickets: true } },
       },
       orderBy: { date: 'asc' },
     });
@@ -37,9 +99,7 @@ export class EventsService {
       where: { id },
       include: {
         tickets: true,
-        _count: {
-          select: { tickets: true },
-        },
+        _count: { select: { tickets: true } },
       },
     });
     if (!event) throw new NotFoundException('Event not found');
@@ -49,11 +109,7 @@ export class EventsService {
   async purchaseTicket(eventId: string, buyerAddress: string, innerTxXdr: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
-      include: {
-        _count: {
-          select: { tickets: true },
-        },
-      },
+      include: { _count: { select: { tickets: true } } },
     });
 
     if (!event) throw new NotFoundException('Event not found');
@@ -61,13 +117,12 @@ export class EventsService {
       throw new BadRequestException('Event is sold out');
     }
 
-    // 1. Submit through the parallel dispatcher (Fee-Bumped, Channel-Assigned)
+    // Submit through the parallel dispatcher (Fee-Bumped, Channel-Assigned)
     const txHash = await this.stellarService.submitSorobanTxWithChannelAndFeeBump(innerTxXdr);
 
-    // 2. Register ticket in DB
+    // Register ticket in DB
     const ticketId = event._count.tickets + 1;
-    
-    // Make sure buyer has a record in User table
+
     await this.prisma.user.upsert({
       where: { walletAddress: buyerAddress },
       update: {},
@@ -75,23 +130,20 @@ export class EventsService {
     });
 
     const ticket = await this.prisma.ticket.create({
-      data: {
-        eventId,
-        ownerAddress: buyerAddress,
-        ticketId,
-        txHash,
-        status: 'MINTED',
-      },
+      data: { eventId, ownerAddress: buyerAddress, ticketId, txHash, status: 'MINTED' },
     });
 
     return { success: true, txHash, ticket };
   }
 
-  async transferTicket(eventId: string, ticketId: number, fromAddress: string, toAddress: string) {
+  async transferTicket(
+    eventId: string,
+    ticketId: number,
+    fromAddress: string,
+    toAddress: string,
+  ) {
     const ticket = await this.prisma.ticket.findUnique({
-      where: {
-        eventId_ticketId: { eventId, ticketId },
-      },
+      where: { eventId_ticketId: { eventId, ticketId } },
     });
 
     if (!ticket) throw new NotFoundException('Ticket not found');
@@ -99,7 +151,6 @@ export class EventsService {
       throw new BadRequestException('Invalid sender address');
     }
 
-    // Update owner in database
     await this.prisma.user.upsert({
       where: { walletAddress: toAddress },
       update: {},
@@ -107,13 +158,8 @@ export class EventsService {
     });
 
     const updatedTicket = await this.prisma.ticket.update({
-      where: {
-        eventId_ticketId: { eventId, ticketId },
-      },
-      data: {
-        ownerAddress: toAddress,
-        status: 'TRANSFERRED',
-      },
+      where: { eventId_ticketId: { eventId, ticketId } },
+      data: { ownerAddress: toAddress, status: 'TRANSFERRED' },
     });
 
     return { success: true, ticket: updatedTicket };
@@ -129,9 +175,7 @@ export class EventsService {
 
   async verifyTicket(eventId: string, ticketId: number, expectedOwner: string) {
     const ticket = await this.prisma.ticket.findUnique({
-      where: {
-        eventId_ticketId: { eventId, ticketId },
-      },
+      where: { eventId_ticketId: { eventId, ticketId } },
     });
 
     if (!ticket) throw new NotFoundException('Ticket not found');
@@ -140,12 +184,8 @@ export class EventsService {
     }
 
     const verifiedTicket = await this.prisma.ticket.update({
-      where: {
-        eventId_ticketId: { eventId, ticketId },
-      },
-      data: {
-        status: 'VERIFIED',
-      },
+      where: { eventId_ticketId: { eventId, ticketId } },
+      data: { status: 'VERIFIED' },
     });
 
     return { success: true, ticket: verifiedTicket };
