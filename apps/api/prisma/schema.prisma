@@ -1,0 +1,54 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String   @id @default(uuid())
+  walletAddress  String   @unique
+  nonce          String?  // SEP-10 Auth Challenge Nonce
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  tickets        Ticket[]
+}
+
+model Event {
+  id                    String   @id @default(uuid())
+  title                 String
+  description           String
+  date                  DateTime
+  price                 String   // String to handle large numbers (e.g. u128 / XLM scale)
+  capacity              Int
+  maxPremiumPctScaled   Int      // e.g. 150 for 15%
+  contractAddress       String?  // Soroban Contract ID
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  tickets               Ticket[]
+}
+
+model Ticket {
+  id            String   @id @default(uuid())
+  eventId       String
+  event         Event    @relation(fields: [eventId], references: [id])
+  ownerAddress  String
+  user          User     @relation(fields: [ownerAddress], references: [walletAddress])
+  ticketId      Int      // The numeric ID of the ticket on-chain
+  txHash        String?  // Minting transaction hash
+  status        String   // MINTED, TRANSFERRED, VERIFIED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([eventId, ticketId])
+}
+
+model ChannelAccount {
+  address      String  @id
+  secretKey    String
+  isLocked     Boolean @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

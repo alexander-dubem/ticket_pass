@@ -1,0 +1,19 @@
+/* Theme CSS Custom Properties */
+
+/* Default Theme (Vibrant Green / Emerald Variant) */
+:root {
+  --brand-primary: #10b981;       /* Emerald 500 */
+  --brand-primary-hover: #059669; /* Emerald 600 */
+  --brand-primary-glow: #10b9811a; /* Emerald 500 with 10% opacity */
+  --brand-gradient-start: #10b981;
+  --brand-gradient-end: #06b6d4;   /* Cyan 500 */
+}
+
+/* Future Theme Switcher Support (Fuchsia Variant) */
+[data-theme="fuchsia"] {
+  --brand-primary: #d946ef;       /* Fuchsia 500 */
+  --brand-primary-hover: #c084fc; /* Fuchsia 400 */
+  --brand-primary-glow: #d946ef1a; /* Fuchsia 500 with 10% opacity */
+  --brand-gradient-start: #d946ef;
+  --brand-gradient-end: #06b6d4;
+}
