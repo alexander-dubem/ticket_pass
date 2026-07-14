@@ -9,6 +9,8 @@ interface WalletContextType {
   token: string | null;
   isConnecting: boolean;
   connect: () => Promise<void>;
+  connectWithId: (walletId: string) => Promise<void>;
+  getSupportedWallets: () => Promise<any[]>;
   disconnect: () => void;
   apiFetch: (url: string, options?: RequestInit) => Promise<any>;
 }
@@ -38,6 +40,67 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setToken(savedToken);
     }
   }, []);
+
+  const getSupportedWallets = async () => {
+    return StellarWalletsKit.refreshSupportedWallets();
+  };
+
+  const connectWithId = async (walletId: string) => {
+    setIsConnecting(true);
+    try {
+      // 1. Programmatically set the wallet and fetch address
+      StellarWalletsKit.setWallet(walletId);
+      const walletRes = await StellarWalletsKit.fetchAddress();
+      const userAddress = walletRes.address;
+      
+      // 2. Fetch challenge XDR from backend (SEP-10 simulation)
+      let challengeXdr: string;
+      let mockAuth = false;
+      try {
+        const chalRes = await fetch(`${BACKEND_URL}/auth/challenge?address=${userAddress}`);
+        if (!chalRes.ok) throw new Error('Backend offline');
+        const data = await chalRes.json();
+        challengeXdr = data.xdr;
+      } catch (err) {
+        console.warn('Backend connection failed, using client-side mock challenge fallback for demonstration.');
+        mockAuth = true;
+        challengeXdr = 'MOCK_CHALLENGE_XDR';
+      }
+
+      let jwtToken = '';
+      if (!mockAuth) {
+        // 3. Request wallet to sign the challenge transaction
+        const signRes = await StellarWalletsKit.signTransaction(challengeXdr, {
+          networkPassphrase: Networks.TESTNET,
+        });
+
+        // 4. Submit signed challenge to backend to get JWT
+        const loginRes = await fetch(`${BACKEND_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address: userAddress, xdr: signRes.signedTxXdr }),
+        });
+
+        if (!loginRes.ok) throw new Error('Challenge verification failed');
+        const loginData = await loginRes.json();
+        jwtToken = loginData.token;
+      } else {
+        // Mock token generation for local dev without backend running
+        jwtToken = 'mock_jwt_token_' + Math.random().toString(36).substring(7);
+      }
+
+      // Save credentials
+      setAddress(userAddress);
+      setToken(jwtToken);
+      localStorage.setItem('drip_address', userAddress);
+      localStorage.setItem('drip_token', jwtToken);
+    } catch (err: any) {
+      console.error('Wallet connection / authentication failed:', err.message);
+      throw err;
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   const connect = async () => {
     setIsConnecting(true);
@@ -133,7 +196,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   return (
-    <WalletContext.Provider value={{ address, token, isConnecting, connect, disconnect, apiFetch }}>
+    <WalletContext.Provider value={{ address, token, isConnecting, connect, connectWithId, getSupportedWallets, disconnect, apiFetch }}>
       {children}
     </WalletContext.Provider>
   );

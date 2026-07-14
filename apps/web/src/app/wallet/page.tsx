@@ -6,7 +6,7 @@ import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import { useWallet } from '../../context/WalletContext';
-import { Calendar, User, ArrowRightLeft, ShieldCheck, Loader2, ArrowRight } from 'lucide-react';
+import { Calendar, User, ArrowRightLeft, ShieldCheck, Loader2, ArrowRight, Wallet } from 'lucide-react';
 import Link from 'next/link';
 
 interface Ticket {
@@ -141,10 +141,20 @@ export default function WalletPage() {
     return (
       <div className="flex flex-col min-h-screen">
         <Header />
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-4">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-4 relative z-10">
+          {/* Background Glows */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand/5 rounded-full blur-[100px] pointer-events-none animate-pulse-slow"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/5 rounded-full blur-[100px] pointer-events-none animate-pulse-slow"></div>
+
           <LandmarkIcon className="w-16 h-16 text-zinc-600" />
           <h2 className="text-2xl font-bold text-white">Your Wallet is Disconnected</h2>
           <p className="text-zinc-400 max-w-sm">Connect your Freighter or Albedo wallet to view your minted tickets and active check-ins.</p>
+          <Link href="/auth?redirect=/wallet" className="mt-2">
+            <Button variant="glow" size="lg" className="gap-2 cursor-pointer">
+              <Wallet className="w-4 h-4" />
+              Connect Wallet
+            </Button>
+          </Link>
         </div>
       </div>
     );

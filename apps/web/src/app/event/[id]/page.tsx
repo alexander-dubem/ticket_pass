@@ -60,7 +60,7 @@ const MOCK_EVENTS: Record<string, Event> = {
 export default function EventDetailsPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
-  const { address, connect, apiFetch } = useWallet();
+  const { address, apiFetch } = useWallet();
   
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +89,7 @@ export default function EventDetailsPage() {
 
   const handleMint = async () => {
     if (!address) {
-      await connect();
+      router.push(`/auth?redirect=/event/${id}`);
       return;
     }
 

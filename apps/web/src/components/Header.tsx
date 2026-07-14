@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { Wallet, LogOut, Disc } from 'lucide-react';
 
 export const Header: React.FC = () => {
-  const { address, connect, disconnect, isConnecting } = useWallet();
+  const { address, disconnect } = useWallet();
 
   const truncateAddress = (addr: string) => {
     return `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
@@ -43,16 +43,16 @@ export const Header: React.FC = () => {
               </Button>
             </div>
           ) : (
-            <Button
-              variant="glow"
-              size="sm"
-              onClick={connect}
-              disabled={isConnecting}
-              className="h-9 gap-2"
-            >
-              <Wallet className="w-4 h-4" />
-              {isConnecting ? 'Connecting...' : 'Connect Wallet'}
-            </Button>
+            <Link href="/auth">
+              <Button
+                variant="glow"
+                size="sm"
+                className="h-9 gap-2 cursor-pointer"
+              >
+                <Wallet className="w-4 h-4" />
+                <span>Connect Wallet</span>
+              </Button>
+            </Link>
           )}
         </div>
       </div>
