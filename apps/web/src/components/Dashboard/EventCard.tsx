@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -55,12 +54,11 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
       {/* Cover Image / Placeholder */}
       <div className="h-36 relative overflow-hidden shrink-0">
         {coverImg ? (
-          <Image
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
             src={coverImg}
             alt={event.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 400px"
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${grad} relative`}>

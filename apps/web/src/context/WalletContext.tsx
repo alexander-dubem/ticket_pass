@@ -1,5 +1,5 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { StellarWalletsKit, Networks } from '@creit.tech/stellar-wallets-kit';
 import { defaultModules } from '@creit.tech/stellar-wallets-kit/modules/utils';
 import { FREIGHTER_ID } from '@creit.tech/stellar-wallets-kit/modules/freighter';
@@ -23,6 +23,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [address, setAddress] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const isRefreshing = useRef(false);
 
   useEffect(() => {
     // Initialize SWK statically
@@ -33,8 +34,8 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
 
     // Hydrate state from localStorage
-    const savedAddress = localStorage.getItem('drip_address');
-    const savedToken = localStorage.getItem('drip_token');
+    const savedAddress = localStorage.getItem('app_address');
+    const savedToken = localStorage.getItem('app_token');
     if (savedAddress && savedToken) {
       setAddress(savedAddress);
       setToken(savedToken);
@@ -45,6 +46,59 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return StellarWalletsKit.refreshSupportedWallets();
   };
 
+  // Shared SEP-10 authentication: fetch challenge -> sign -> exchange for a JWT.
+  // Throws on failure (callers decide whether to fall back to a mock token).
+  const sep10Authenticate = async (userAddress: string): Promise<string> => {
+    const chalRes = await fetch(`${BACKEND_URL}/auth/challenge?address=${userAddress}`);
+    if (!chalRes.ok) throw new Error('Backend offline');
+    const data = await chalRes.json();
+
+    const signRes = await StellarWalletsKit.signTransaction(data.xdr, {
+      networkPassphrase: Networks.TESTNET,
+    });
+
+    const loginRes = await fetch(`${BACKEND_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: userAddress, xdr: signRes.signedTxXdr }),
+    });
+
+    if (!loginRes.ok) {
+      let errorMsg = 'Challenge verification failed';
+      try {
+        const errorJson = await loginRes.json();
+        errorMsg = errorJson.message || errorMsg;
+      } catch {}
+      throw new Error(errorMsg);
+    }
+
+    const loginData = await loginRes.json();
+    return loginData.token;
+  };
+
+  // Re-authenticate the connected wallet and swap in a fresh real JWT.
+  // Returns the new token, or null if no wallet/address is available to refresh.
+  const refreshToken = async (): Promise<string | null> => {
+    if (isRefreshing.current) return null;
+    const knownAddress = address ?? localStorage.getItem('app_address');
+    if (!knownAddress) return null;
+
+    isRefreshing.current = true;
+    try {
+      const newToken = await sep10Authenticate(knownAddress);
+      setAddress(knownAddress);
+      setToken(newToken);
+      localStorage.setItem('app_address', knownAddress);
+      localStorage.setItem('app_token', newToken);
+      return newToken;
+    } catch (err: any) {
+      console.warn('Session refresh failed — please reconnect your wallet:', err.message);
+      return null;
+    } finally {
+      isRefreshing.current = false;
+    }
+  };
+
   const connectWithId = async (walletId: string) => {
     setIsConnecting(true);
     try {
@@ -52,48 +106,22 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       StellarWalletsKit.setWallet(walletId);
       const walletRes = await StellarWalletsKit.fetchAddress();
       const userAddress = walletRes.address;
-      
-      // 2. Fetch challenge XDR from backend (SEP-10 simulation)
-      let challengeXdr: string;
-      let mockAuth = false;
+
+      // 2. SEP-10 authentication (challenge + sign + login) to get a real JWT
+      let jwtToken: string;
       try {
-        const chalRes = await fetch(`${BACKEND_URL}/auth/challenge?address=${userAddress}`);
-        if (!chalRes.ok) throw new Error('Backend offline');
-        const data = await chalRes.json();
-        challengeXdr = data.xdr;
-      } catch (err) {
+        jwtToken = await sep10Authenticate(userAddress);
+      } catch (err: any) {
+        if (err.message !== 'Backend offline') throw err;
         console.warn('Backend connection failed, using client-side mock challenge fallback for demonstration.');
-        mockAuth = true;
-        challengeXdr = 'MOCK_CHALLENGE_XDR';
-      }
-
-      let jwtToken = '';
-      if (!mockAuth) {
-        // 3. Request wallet to sign the challenge transaction
-        const signRes = await StellarWalletsKit.signTransaction(challengeXdr, {
-          networkPassphrase: Networks.TESTNET,
-        });
-
-        // 4. Submit signed challenge to backend to get JWT
-        const loginRes = await fetch(`${BACKEND_URL}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address: userAddress, xdr: signRes.signedTxXdr }),
-        });
-
-        if (!loginRes.ok) throw new Error('Challenge verification failed');
-        const loginData = await loginRes.json();
-        jwtToken = loginData.token;
-      } else {
-        // Mock token generation for local dev without backend running
         jwtToken = 'mock_jwt_token_' + Math.random().toString(36).substring(7);
       }
 
       // Save credentials
       setAddress(userAddress);
       setToken(jwtToken);
-      localStorage.setItem('drip_address', userAddress);
-      localStorage.setItem('drip_token', jwtToken);
+      localStorage.setItem('app_address', userAddress);
+      localStorage.setItem('app_token', jwtToken);
     } catch (err: any) {
       console.error('Wallet connection / authentication failed:', err.message);
       throw err;
@@ -108,48 +136,22 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // 1. Open Wallet Picker via static authModal
       const walletRes = await StellarWalletsKit.authModal();
       const userAddress = walletRes.address;
-      
-      // 2. Fetch challenge XDR from backend (SEP-10 simulation)
-      let challengeXdr: string;
-      let mockAuth = false;
+
+      // 2. SEP-10 authentication (challenge + sign + login) to get a real JWT
+      let jwtToken: string;
       try {
-        const chalRes = await fetch(`${BACKEND_URL}/auth/challenge?address=${userAddress}`);
-        if (!chalRes.ok) throw new Error('Backend offline');
-        const data = await chalRes.json();
-        challengeXdr = data.xdr;
-      } catch (err) {
+        jwtToken = await sep10Authenticate(userAddress);
+      } catch (err: any) {
+        if (err.message !== 'Backend offline') throw err;
         console.warn('Backend connection failed, using client-side mock challenge fallback for demonstration.');
-        mockAuth = true;
-        challengeXdr = 'MOCK_CHALLENGE_XDR';
-      }
-
-      let jwtToken = '';
-      if (!mockAuth) {
-        // 3. Request wallet to sign the challenge transaction
-        const signRes = await StellarWalletsKit.signTransaction(challengeXdr, {
-          networkPassphrase: Networks.TESTNET,
-        });
-
-        // 4. Submit signed challenge to backend to get JWT
-        const loginRes = await fetch(`${BACKEND_URL}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address: userAddress, xdr: signRes.signedTxXdr }),
-        });
-
-        if (!loginRes.ok) throw new Error('Challenge verification failed');
-        const loginData = await loginRes.json();
-        jwtToken = loginData.token;
-      } else {
-        // Mock token generation for local dev without backend running
         jwtToken = 'mock_jwt_token_' + Math.random().toString(36).substring(7);
       }
 
       // Save credentials
       setAddress(userAddress);
       setToken(jwtToken);
-      localStorage.setItem('drip_address', userAddress);
-      localStorage.setItem('drip_token', jwtToken);
+      localStorage.setItem('app_address', userAddress);
+      localStorage.setItem('app_token', jwtToken);
     } catch (err: any) {
       console.error('Wallet connection / authentication failed:', err.message);
       alert(`Wallet Connection Error: ${err.message}`);
@@ -161,17 +163,24 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const disconnect = () => {
     setAddress(null);
     setToken(null);
-    localStorage.removeItem('drip_address');
-    localStorage.removeItem('drip_token');
+    localStorage.removeItem('app_address');
+    localStorage.removeItem('app_token');
   };
 
-  // Helper fetch function that automatically appends the SEP-10 Bearer Token
-  const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
+  // Helper fetch function that automatically appends the SEP-10 Bearer Token,
+  // and transparently re-authenticates + retries once if the token is invalid/expired (401).
+  const apiFetch = async (
+    endpoint: string,
+    options: RequestInit = {},
+    retried = false,
+    overrideToken?: string
+  ): Promise<any> => {
+    const currentToken = overrideToken ?? token ?? localStorage.getItem('app_token');
     const headers = new Headers(options.headers || {});
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
+    if (currentToken) {
+      headers.set('Authorization', `Bearer ${currentToken}`);
     }
-    
+
     // Default to JSON Content-Type if posting body
     if (options.body && !headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
@@ -181,6 +190,18 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       ...options,
       headers,
     });
+
+    // Session expired or invalid — try to silently re-authenticate and retry once
+    if (response.status === 401 && !retried) {
+      const knownAddress = address ?? localStorage.getItem('app_address');
+      if (knownAddress) {
+        const newToken = await refreshToken();
+        if (newToken) {
+          return apiFetch(endpoint, options, true, newToken);
+        }
+        throw new Error('Session expired. Please reconnect your wallet and try again.');
+      }
+    }
 
     if (!response.ok) {
       const errorText = await response.text();

@@ -116,7 +116,7 @@ export const WalletList: React.FC<WalletListProps> = ({
 
       <div className="mt-4 pt-4 border-t border-white/10 flex items-center gap-2 text-[10px] text-zinc-600">
         <Wallet className="w-3 h-3 text-fuchsia-500" />
-        <span>Wallets never expose your secret keys to Drip Wave.</span>
+        <span>Wallets never expose your secret keys to TicketPass.</span>
       </div>
     </div>
   );

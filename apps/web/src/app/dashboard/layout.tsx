@@ -17,7 +17,7 @@ export default function DashboardLayout({
   useEffect(() => {
     // Small delay to allow localStorage hydration before deciding to redirect
     const t = setTimeout(() => {
-      if (!address && !localStorage.getItem("drip_address")) {
+      if (!address && !localStorage.getItem("app_address")) {
         router.push("/auth?redirect=/dashboard/overview");
       }
     }, 300);

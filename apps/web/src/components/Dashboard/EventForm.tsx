@@ -24,6 +24,7 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Switch } from "../ui/switch";
 import { Spinner } from "../ui/spinner";
+import { DateTimePicker } from "../ui/date-time-picker";
 import {
   Select,
   SelectContent,
@@ -64,20 +65,27 @@ const CATEGORIES = [
 // ── Zod Schema ────────────────────────────────────────────────────────────────
 const eventSchema = z.object({
   title: z
-    .string()
-    .min(3, "Title must be at least 3 characters")
-    .max(100, "Title must be under 100 characters"),
+    .string("Please enter an event name")
+    .min(3, "Event name must be at least 3 characters")
+    .max(100, "Event name must be under 100 characters"),
   description: z
-    .string()
+    .string("Please enter a description")
     .min(20, "Description must be at least 20 characters")
     .max(5000, "Description is too long"),
-  date: z.string().min(1, "Start date is required"),
-  endDate: z.string().optional(),
-  location: z.string().min(2, "Location is required"),
-  price: z
-    .string()
-    .min(1, "Price is required")
-    .refine((v) => !isNaN(Number(v)) && Number(v) >= 0, "Must be a valid number"),
+  date: z
+    .string("Please choose a start date & time")
+    .min(1, "Start date & time is required"),
+  endDate: z.string("Please choose a valid end date & time").optional(),
+  location: z
+    .string("Please enter the venue or location")
+    .min(2, "Location is required"),
+  price: z.preprocess(
+    (v) => (v === undefined || v === null ? "" : v),
+    z
+      .string("Please enter a price")
+      .min(1, "Price is required")
+      .refine((v) => !isNaN(Number(v)) && Number(v) >= 0, "Must be a valid number")
+  ),
   capacity: z
     .number({ message: "Capacity must be a valid number" })
     .int("Must be a whole number")
@@ -87,9 +95,14 @@ const eventSchema = z.object({
     .number({ message: "Must be a valid number" })
     .min(0, "Cannot be negative")
     .max(5000, "Max 500%"),
-  images: z.array(z.string().url("Each image must be a valid URL")).optional(),
-  instructions: z.string().max(2000, "Instructions too long").optional(),
-  category: z.string().optional(),
+  images: z
+    .array(z.string("Each image must be a valid URL").url("Each image must be a valid URL"))
+    .optional(),
+  instructions: z
+    .string("Please enter the entry instructions")
+    .max(2000, "Instructions too long")
+    .optional(),
+  category: z.string("Please pick a category").optional(),
   tags: z.array(z.string()).optional(),
   isPublished: z.boolean(),
 });
@@ -291,29 +304,22 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
               <FieldLabel htmlFor="date">
                 Start Date & Time <span className="text-destructive">*</span>
               </FieldLabel>
-              <Input
+              <DateTimePicker
                 id="date"
-                name="date"
-                type="datetime-local"
-                value={formik.values.date}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                aria-invalid={invalid("date")}
-                className="h-10 rounded-lg"
+                value={formik.values.date || undefined}
+                onValueChange={(iso) => formik.setFieldValue("date", iso)}
+                placeholder="Pick a start date & time"
               />
               <FieldError>{hasError("date") ? formik.errors.date : undefined}</FieldError>
             </Field>
 
             <Field>
               <FieldLabel htmlFor="endDate">End Date & Time</FieldLabel>
-              <Input
+              <DateTimePicker
                 id="endDate"
-                name="endDate"
-                type="datetime-local"
-                value={formik.values.endDate}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                className="h-10 rounded-lg"
+                value={formik.values.endDate || undefined}
+                onValueChange={(iso) => formik.setFieldValue("endDate", iso)}
+                placeholder="Pick an end date & time"
               />
               <FieldDescription>Optional</FieldDescription>
             </Field>
@@ -368,7 +374,7 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
                   step="0.1"
                   placeholder="0.00"
                   value={formik.values.price}
-                  onChange={formik.handleChange}
+                  onChange={(e) => formik.setFieldValue("price", e.target.value)}
                   onBlur={formik.handleBlur}
                   aria-invalid={invalid("price")}
                 />

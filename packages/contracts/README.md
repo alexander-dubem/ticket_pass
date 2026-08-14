@@ -32,7 +32,7 @@ cargo build --target wasm32-unknown-unknown --release
 ```
 
 The optimized WASM contract file will be located at:
-`target/wasm32-unknown-unknown/release/drip_ticketing.wasm`
+`target/wasm32-unknown-unknown/release/ticket_pass_contract.wasm`
 
 ## Running Tests
 

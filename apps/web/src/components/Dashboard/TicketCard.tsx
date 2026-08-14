@@ -1,5 +1,4 @@
 import React from "react";
-import Image from "next/image";
 import { CalendarDays, MapPin, Hash, CheckCircle, ArrowRightLeft, Zap, Ticket } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
@@ -64,12 +63,11 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket }) => {
       {/* Cover */}
       <div className="h-36 relative overflow-hidden">
         {coverImg ? (
-          <Image
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
             src={coverImg}
             alt={event.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 400px"
-            className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
           />
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${grad} relative`}>
@@ -90,7 +88,7 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket }) => {
           {ticket.status}
         </Badge>
         <div className="absolute bottom-2 left-3 text-[9px] font-mono text-white/60 tracking-widest">
-          DRIP WAVE · {dateStr.toUpperCase()}
+          TICKETPASS · {dateStr.toUpperCase()}
         </div>
       </div>
 

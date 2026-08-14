@@ -53,7 +53,7 @@ export class AuthService {
     )
       .addOperation(
         Operation.manageData({
-          name: 'Drip Web Auth',
+          name: 'TicketPass Web Auth',
           value: Buffer.from(nonce),
           source: clientPublicKey,
         })

@@ -2,13 +2,13 @@
 use soroban_sdk::{contract, contractimpl, Env, Address, Symbol, symbol_short};
 
 #[contract]
-pub struct DripTicketingContract;
+pub struct TicketPassContract;
 
 const LEDGER_THRESHOLD_BUMP: u32 = 17280; // ~1 day in ledgers
 const LEDGER_BUMP_TO: u32 = 777600;       // ~45 days in ledgers
 
 #[contractimpl]
-impl DripTicketingContract {
+impl TicketPassContract {
     // Initializer/configuration can be stored in instance storage
     pub fn initialize(env: Env, admin: Address, capacity: u32, original_price: u128, max_premium_pct_scaled: u128) {
         admin.require_auth();

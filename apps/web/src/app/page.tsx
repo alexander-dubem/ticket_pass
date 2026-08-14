@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
@@ -159,13 +158,11 @@ export default function HomePage() {
         {/* ── HERO ─────────────────────────────────────────────────── */}
         <section className="relative text-center pt-16 md:pt-24 pb-8 max-w-4xl mx-auto px-4 flex flex-col items-center">
           <div className="absolute inset-0 -z-10 overflow-hidden">
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1920&q=70"
               alt="Live event crowd under lights"
-              fill
-              sizes="100vw"
-              priority
-              className="object-cover object-center opacity-35"
+              className="w-full h-full object-cover object-center opacity-35"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-[#0b0514]/85 via-[#0b0514]/55 to-[#0b0514]/10" />
           </div>
@@ -219,7 +216,7 @@ export default function HomePage() {
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-1.5">
                     <Disc className="w-5 h-5 text-white" />
-                    <span className="text-white font-extrabold text-sm tracking-tight">DRIP&nbsp;WAVE</span>
+                    <span className="text-white font-extrabold text-sm tracking-tight">TICKETPASS&nbsp;</span>
                   </div>
                   <Badge variant="gold" className="bg-amber-400/20 text-amber-200">SEP-10</Badge>
                 </div>
@@ -354,12 +351,11 @@ export default function HomePage() {
                   <div className="relative h-52 overflow-hidden">
                     <div className={`absolute inset-0 bg-gradient-to-br ${CARD_GRADIENTS[i % CARD_GRADIENTS.length]}`} />
                     {ev.images?.[0] ? (
-                      <Image
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
                         src={ev.images[0]}
                         alt={ev.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : null}
                     <div className="absolute inset-0 bg-grid opacity-40 mix-blend-overlay" />
@@ -588,7 +584,7 @@ export default function HomePage() {
               {[
                 {
                   q: 'Do I need XLM to purchase or transfer tickets?',
-                  a: 'No. Drip Wave uses a Master Sponsor Account that covers network gas fees via Stellar’s fee-bump envelope — you pay only the ticket price.',
+                  a: 'No. TicketPass uses a Master Sponsor Account that covers network gas fees via Stellar’s fee-bump envelope — you pay only the ticket price.',
                 },
                 {
                   q: 'How does the contract stop scalpers and bots?',

@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
@@ -222,13 +221,11 @@ export default function EventDetailsPage() {
         <div className="relative h-72 md:h-80 rounded-3xl overflow-hidden border border-white/15 shadow-2xl shadow-fuchsia-500/10 mb-10">
           <div className={`absolute inset-0 bg-gradient-to-br ${heroGrad}`} />
           {event.images?.[0] ? (
-            <Image
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
               src={event.images[0]}
               alt={event.title}
-              fill
-              sizes="(max-width: 1024px) 100vw, 1024px"
-              priority
-              className="object-cover"
+              className="w-full h-full object-cover"
             />
           ) : null}
           <div className="absolute inset-0 bg-grid opacity-40 mix-blend-overlay" />
