@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -10,6 +11,9 @@ import {
   Coins,
   Sparkle,
 } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Progress, ProgressIndicator, ProgressTrack } from "../ui/progress";
 
 interface EventCardProps {
   event: {
@@ -51,10 +55,12 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
       {/* Cover Image / Placeholder */}
       <div className="h-36 relative overflow-hidden shrink-0">
         {coverImg ? (
-          <img
+          <Image
             src={coverImg}
             alt={event.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            fill
+            sizes="(max-width: 768px) 100vw, 400px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${grad} relative`}>
@@ -68,12 +74,9 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         {/* Status Badge */}
-        <div
-          className={`absolute top-3 right-3 flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border backdrop-blur-sm ${
-            event.isPublished
-              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-              : "bg-zinc-700/50 border-zinc-600/40 text-zinc-300"
-          }`}
+        <Badge
+          className="absolute top-3 right-3 gap-1 backdrop-blur-sm"
+          variant={event.isPublished ? "success" : "outline"}
         >
           {event.isPublished ? (
             <>
@@ -84,11 +87,14 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
               <EyeOff className="w-2.5 h-2.5" /> Draft
             </>
           )}
-        </div>
+        </Badge>
         {event.category && (
-          <div className="absolute top-3 left-3 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-violet-500 text-white border border-white/20">
+          <Badge
+            variant="gradient"
+            className="absolute top-3 left-3 border-white/20"
+          >
             {event.category}
-          </div>
+          </Badge>
         )}
       </div>
 
@@ -122,21 +128,22 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
             </span>
             <span className="text-gradient font-bold">{pctSold}%</span>
           </div>
-          <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500 rounded-full transition-all duration-500"
-              style={{ width: `${pctSold}%` }}
-            />
-          </div>
+          <Progress value={pctSold} className="gap-0">
+            <ProgressTrack className="h-1.5 bg-white/[0.06]">
+              <ProgressIndicator className="bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500" />
+            </ProgressTrack>
+          </Progress>
         </div>
 
         {/* Edit action */}
-        <Link
-          href={`/dashboard/events/${event.id}/edit`}
-          className="mt-1 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-fuchsia-400/40 rounded-xl py-2 transition-all cursor-pointer"
-        >
-          <Pencil className="w-3.5 h-3.5" />
-          Edit Event
+        <Link href={`/dashboard/events/${event.id}/edit`} className="mt-1">
+          <Button
+            variant="ghost"
+            className="w-full gap-2 text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-fuchsia-400/40 rounded-xl"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            Edit Event
+          </Button>
         </Link>
       </div>
     </div>

@@ -4,6 +4,8 @@ import { Loader2, Copy, Check, User, Pencil } from "lucide-react";
 import { useWallet } from "../../../context/WalletContext";
 import { DashboardHeader } from "../../../components/Dashboard/DashboardHeader";
 import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Field } from "../../../components/ui/field";
 
 export default function ProfilePage() {
   const { address, apiFetch } = useWallet();
@@ -69,14 +71,16 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1 min-w-0">
               {editing ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Your display name"
-                    className="input-field flex-1 text-sm"
-                    autoFocus
-                  />
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <Field className="flex-1 min-w-0">
+                    <Input
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Your display name"
+                      className="h-9 rounded-lg text-sm"
+                      autoFocus
+                    />
+                  </Field>
                   <Button
                     size="sm"
                     variant="glow"

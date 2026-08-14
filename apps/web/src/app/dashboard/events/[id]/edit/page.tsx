@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { DashboardHeader } from "../../../../../components/Dashboard/DashboardHeader";
 import { EventForm } from "../../../../../components/Dashboard/EventForm";
+import { Spinner } from "../../../../../components/ui/spinner";
 
 export default function EditEventPage() {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +22,7 @@ export default function EditEventPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-48">
-        <Loader2 className="w-8 h-8 text-brand animate-spin" />
+        <Spinner className="size-8 text-brand" />
       </div>
     );
   }

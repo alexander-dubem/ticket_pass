@@ -1,8 +1,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../components/ui/accordion';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
@@ -23,6 +25,7 @@ interface Event {
   capacity: number;
   maxPremiumPctScaled: number;
   contractAddress: string | null;
+  images?: string[];
   _count?: { tickets: number };
 }
 
@@ -36,6 +39,7 @@ const MOCK_EVENTS: Event[] = [
     capacity: 250,
     maxPremiumPctScaled: 150,
     contractAddress: 'CCZ...MNT',
+    images: ['https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=800&q=80'],
     _count: { tickets: 182 },
   },
   {
@@ -47,6 +51,7 @@ const MOCK_EVENTS: Event[] = [
     capacity: 150,
     maxPremiumPctScaled: 200,
     contractAddress: 'CCY...HZN',
+    images: ['https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80'],
     _count: { tickets: 145 },
   },
   {
@@ -58,6 +63,7 @@ const MOCK_EVENTS: Event[] = [
     capacity: 500,
     maxPremiumPctScaled: 100,
     contractAddress: 'CCX...DEV',
+    images: ['https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80'],
     _count: { tickets: 120 },
   },
 ];
@@ -152,6 +158,17 @@ export default function HomePage() {
       <main className="flex-1 relative z-10">
         {/* ── HERO ─────────────────────────────────────────────────── */}
         <section className="relative text-center pt-16 md:pt-24 pb-8 max-w-4xl mx-auto px-4 flex flex-col items-center">
+          <div className="absolute inset-0 -z-10 overflow-hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1920&q=70"
+              alt="Live event crowd under lights"
+              fill
+              sizes="100vw"
+              priority
+              className="object-cover object-center opacity-35"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#0b0514]/85 via-[#0b0514]/55 to-[#0b0514]/10" />
+          </div>
           <div className="bg-grid absolute inset-0 -z-10" />
           <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[560px] h-[360px] bg-gradient-to-r from-pink-500/25 via-fuchsia-500/20 to-cyan-400/20 rounded-full blur-[110px] pointer-events-none" />
 
@@ -336,14 +353,25 @@ export default function HomePage() {
                   {/* Ticket cover */}
                   <div className="relative h-52 overflow-hidden">
                     <div className={`absolute inset-0 bg-gradient-to-br ${CARD_GRADIENTS[i % CARD_GRADIENTS.length]}`} />
+                    {ev.images?.[0] ? (
+                      <Image
+                        src={ev.images[0]}
+                        alt={ev.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : null}
                     <div className="absolute inset-0 bg-grid opacity-40 mix-blend-overlay" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30" />
 
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 border border-white/25 backdrop-blur-sm">
-                        <EventIcon className="w-9 h-9 text-white" />
+                    {ev.images?.[0] ? null : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 border border-white/25 backdrop-blur-sm">
+                          <EventIcon className="w-9 h-9 text-white" />
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="absolute top-4 left-4 flex gap-2">
                       <Badge variant={isSoldOut ? "destructive" : "gradient"}>
@@ -556,7 +584,7 @@ export default function HomePage() {
               <p className="text-sm text-zinc-500">Everything you need to know before grabbing your pass.</p>
             </div>
 
-            <div className="max-w-3xl mx-auto space-y-3">
+            <Accordion className="max-w-3xl mx-auto gap-3">
               {[
                 {
                   q: 'Do I need XLM to purchase or transfer tickets?',
@@ -574,20 +602,26 @@ export default function HomePage() {
                   q: 'What happens if my ticket state expires on-chain?',
                   a: 'Proactive TTL management keeps your ownership records alive. Every mint or transfer automatically extends state leases for at least 45 days before an event.',
                 },
-              ].map((faq) => (
-                <details key={faq.q} className="group glass border border-white/10 rounded-2xl overflow-hidden [&_summary::-webkit-details-marker]:hidden">
-                  <summary className="flex items-center justify-between gap-4 p-5 text-sm font-bold text-white cursor-pointer select-none focus:outline-none">
-                    <span>{faq.q}</span>
-                    <span className="w-6 h-6 shrink-0 rounded-full border border-white/15 flex items-center justify-center text-zinc-400 transition-transform duration-300 group-open:rotate-45">
-                      <Sparkles className="w-3 h-3" />
+              ].map((faq, i) => (
+                <AccordionItem
+                  key={faq.q}
+                  value={faq.q}
+                  className="glass border border-white/10 rounded-2xl overflow-hidden not-last:border-white/10 px-1"
+                >
+                  <AccordionTrigger className="p-5 text-sm font-bold text-white">
+                    <span className="flex items-center gap-3">
+                      <span className="w-6 h-6 shrink-0 rounded-full bg-gradient-to-br from-pink-500/20 to-violet-500/20 border border-fuchsia-500/30 flex items-center justify-center text-[10px] font-mono text-fuchsia-300">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      {faq.q}
                     </span>
-                  </summary>
-                  <div className="px-5 pb-5 pt-0 text-xs text-zinc-400 leading-relaxed">
+                  </AccordionTrigger>
+                  <AccordionContent className="px-5 pb-5 text-xs text-zinc-400 leading-relaxed">
                     {faq.a}
-                  </div>
-                </details>
+                  </AccordionContent>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           </div>
         </section>
       </main>

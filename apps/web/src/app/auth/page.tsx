@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, Suspense } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
@@ -61,8 +62,21 @@ function AuthContent() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="relative flex flex-col min-h-screen overflow-hidden">
       <Header />
+
+      {/* Backdrop image */}
+      <div className="absolute inset-0 pointer-events-none">
+        <Image
+          src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1920&q=70"
+          alt=""
+          fill
+          sizes="100vw"
+          priority
+          className="object-cover opacity-15"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+      </div>
 
       {/* Background Glows */}
       <div className="absolute top-10 left-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-[110px] pointer-events-none animate-pulse-slow"></div>

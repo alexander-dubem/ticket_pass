@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useWallet } from "../../context/WalletContext";
 import { DashboardSidebar } from "../../components/Dashboard/DashboardSidebar";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "../../components/ui/spinner";
 
 export default function DashboardLayout({
   children,
@@ -28,7 +28,7 @@ export default function DashboardLayout({
   if (!address) {
     return (
       <div className="mesh-bg flex min-h-screen items-center justify-center">
-        <Loader2 className="w-10 h-10 text-fuchsia-500 animate-spin" />
+        <Spinner className="size-10 text-fuchsia-500" />
       </div>
     );
   }

@@ -6,6 +6,8 @@ import { Card, CardDescription } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
+import { Field, FieldLabel } from '../../components/ui/field';
+import { Input } from '../../components/ui/input';
 import { useWallet } from '../../context/WalletContext';
 import { Calendar, User, ArrowRightLeft, ShieldCheck, Loader2, ArrowRight, Wallet, Coins, QrCode } from 'lucide-react';
 import Link from 'next/link';
@@ -307,27 +309,29 @@ export default function WalletPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-xs text-zinc-400 font-medium">Recipient Address</label>
-                  <input
+                <Field>
+                  <FieldLabel htmlFor="recipient">Recipient Address</FieldLabel>
+                  <Input
+                    id="recipient"
                     type="text"
                     value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}
                     placeholder="Stellar address (G...)"
-                    className="w-full input-field font-mono text-xs"
+                    className="h-9 rounded-lg font-mono text-xs"
                   />
-                </div>
+                </Field>
 
-                <div className="space-y-2">
-                  <label className="text-xs text-zinc-400 font-medium">Resale Price (XLM)</label>
-                  <input
+                <Field>
+                  <FieldLabel htmlFor="resalePrice">Resale Price (XLM)</FieldLabel>
+                  <Input
+                    id="resalePrice"
                     type="number"
                     value={priceInput}
                     onChange={(e) => setPriceInput(e.target.value)}
                     placeholder="Enter resale price"
-                    className="w-full input-field font-mono text-xs"
+                    className="h-9 rounded-lg font-mono text-xs"
                   />
-                </div>
+                </Field>
               </div>
             )}
             <DialogFooter>

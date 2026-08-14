@@ -4,6 +4,7 @@ import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
+import { Textarea } from '../../components/ui/textarea';
 import { useWallet } from '../../context/WalletContext';
 import { ShieldAlert, ShieldCheck, Loader2, ScanLine, KeyRound, UserCheck } from 'lucide-react';
 
@@ -113,12 +114,12 @@ export default function VerifyPage() {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <ScanLine className="w-4 h-4 text-cyan-400" />
               </div>
-              <textarea
+              <Textarea
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
                 placeholder="Paste base64 signed entry token here..."
                 rows={4}
-                className="w-full bg-black/40 border border-white/15 rounded-xl pl-9 p-3 text-xs text-white font-mono focus:outline-none focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 transition-all resize-none"
+                className="w-full bg-black/40 border-white/15 rounded-xl pl-9 text-xs text-white font-mono focus-visible:border-cyan-400/50 focus-visible:ring-2 focus-visible:ring-cyan-400/20 transition-all resize-none"
               />
               {tokenInput && (
                 <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-cyan-400 to-transparent overflow-hidden">

@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
@@ -19,6 +20,7 @@ interface Event {
   capacity: number;
   maxPremiumPctScaled: number;
   contractAddress: string | null;
+  images?: string[];
   _count?: { tickets: number };
 }
 
@@ -32,6 +34,7 @@ const MOCK_EVENTS: Record<string, Event> = {
     capacity: 250,
     maxPremiumPctScaled: 150,
     contractAddress: 'CCZ...MNT',
+    images: ['https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1200&q=80'],
     _count: { tickets: 182 },
   },
   '2': {
@@ -43,6 +46,7 @@ const MOCK_EVENTS: Record<string, Event> = {
     capacity: 150,
     maxPremiumPctScaled: 200,
     contractAddress: 'CCY...HZN',
+    images: ['https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80'],
     _count: { tickets: 145 },
   },
   '3': {
@@ -54,6 +58,7 @@ const MOCK_EVENTS: Record<string, Event> = {
     capacity: 500,
     maxPremiumPctScaled: 100,
     contractAddress: 'CCX...DEV',
+    images: ['https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80'],
     _count: { tickets: 120 },
   },
 };
@@ -204,16 +209,30 @@ export default function EventDetailsPage() {
       <Header />
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl relative z-10">
-        <button onClick={() => router.back()} className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors mb-6">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="gap-2 text-sm text-zinc-400 hover:text-white px-3 -ml-3 mb-6"
+        >
           <ArrowLeft className="w-4 h-4" />
           Back to Drops
-        </button>
+        </Button>
 
         {/* Hero Banner */}
         <div className="relative h-72 md:h-80 rounded-3xl overflow-hidden border border-white/15 shadow-2xl shadow-fuchsia-500/10 mb-10">
           <div className={`absolute inset-0 bg-gradient-to-br ${heroGrad}`} />
+          {event.images?.[0] ? (
+            <Image
+              src={event.images[0]}
+              alt={event.title}
+              fill
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              priority
+              className="object-cover"
+            />
+          ) : null}
           <div className="absolute inset-0 bg-grid opacity-40 mix-blend-overlay" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/30" />
 
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
             <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 border border-white/25 backdrop-blur-sm mb-5 glow-brand">

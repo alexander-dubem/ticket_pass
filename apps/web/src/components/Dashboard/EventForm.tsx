@@ -12,7 +12,6 @@ import {
   Tag,
   FileText,
   ImageIcon,
-  Loader2,
   Plus,
   X,
   Globe,
@@ -20,6 +19,32 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Switch } from "../ui/switch";
+import { Spinner } from "../ui/spinner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "../ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "../ui/input-group";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
 import { useWallet } from "../../context/WalletContext";
 
 // ── Categories ────────────────────────────────────────────────────────────────
@@ -155,9 +180,11 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
   const removeImage = (url: string) =>
     formik.setFieldValue("images", (formik.values.images ?? []).filter((u) => u !== url));
 
-  // ── Helper to determine field error class
-  const fieldClass = (name: keyof EventFormValues) =>
-    `input-field${formik.touched[name] && formik.errors[name] ? " input-error" : ""}`;
+  // ── Field validation helpers
+  const hasError = (name: keyof EventFormValues) =>
+    formik.touched[name] && !!formik.errors[name];
+  const invalid = (name: keyof EventFormValues) =>
+    hasError(name) ? true : undefined;
 
   return (
     <form onSubmit={formik.handleSubmit} noValidate className="space-y-6 max-w-2xl">
@@ -169,33 +196,32 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
           <h2 className="text-sm font-bold text-white">Basic Information</h2>
         </div>
 
-        <div className="p-6 space-y-5">
+        <FieldGroup className="p-6">
           {/* Title */}
-          <FormField
-            label="Event Name"
-            required
-            error={formik.touched.title ? formik.errors.title : undefined}
-          >
-            <input
+          <Field data-invalid={hasError("title")}>
+            <FieldLabel htmlFor="title">
+              Event Name <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Input
               id="title"
               name="title"
               type="text"
-              placeholder="e.g. Stellar Hackathon Lagos 2025"
+              placeholder="e.g. Neon Bloom Festival Lagos"
               value={formik.values.title}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={fieldClass("title")}
+              aria-invalid={invalid("title")}
+              className="h-10 rounded-lg"
             />
-          </FormField>
+            <FieldError>{hasError("title") ? formik.errors.title : undefined}</FieldError>
+          </Field>
 
           {/* Description */}
-          <FormField
-            label="Description"
-            required
-            error={formik.touched.description ? formik.errors.description : undefined}
-            hint={`${formik.values.description.length}/5000`}
-          >
-            <textarea
+          <Field data-invalid={hasError("description")}>
+            <FieldLabel htmlFor="description">
+              Description <span className="text-destructive">*</span>
+            </FieldLabel>
+            <Textarea
               id="description"
               name="description"
               rows={5}
@@ -203,37 +229,41 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
               value={formik.values.description}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`${fieldClass("description")} resize-none`}
+              aria-invalid={invalid("description")}
+              className="rounded-lg"
             />
-          </FormField>
+            <FieldDescription>
+              {`${formik.values.description.length}/5000`}
+            </FieldDescription>
+            <FieldError>
+              {hasError("description") ? formik.errors.description : undefined}
+            </FieldError>
+          </Field>
 
           {/* Category */}
-          <FormField
-            label="Category"
-            error={formik.touched.category ? formik.errors.category : undefined}
-          >
-            <select
-              id="category"
-              name="category"
-              value={formik.values.category}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              className={`${fieldClass("category")} input-field-select`}
+          <Field>
+            <FieldLabel htmlFor="category">Category</FieldLabel>
+            <Select
+              value={formik.values.category || null}
+              onValueChange={(value: string | null) =>
+                formik.setFieldValue("category", value ?? "")
+              }
             >
-              <option value="">Select a category...</option>
-              {CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </FormField>
+              <SelectTrigger id="category" className="w-full h-10 rounded-lg">
+                <SelectValue placeholder="Select a category..." />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
 
           {/* Instructions */}
-          <FormField
-            label="Entry Instructions"
-            error={formik.touched.instructions ? formik.errors.instructions : undefined}
-            hint="Dress code, ID requirements, gate info, etc."
-          >
-            <textarea
+          <Field>
+            <FieldLabel htmlFor="instructions">Entry Instructions</FieldLabel>
+            <Textarea
               id="instructions"
               name="instructions"
               rows={3}
@@ -241,10 +271,11 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
               value={formik.values.instructions}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`${fieldClass("instructions")} resize-none`}
+              className="rounded-lg"
             />
-          </FormField>
-        </div>
+            <FieldDescription>Dress code, ID requirements, gate info, etc.</FieldDescription>
+          </Field>
+        </FieldGroup>
       </section>
 
       {/* ── Date & Location ───────────────────────────────────────────── */}
@@ -254,49 +285,49 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
           <h2 className="text-sm font-bold text-white">Date & Location</h2>
         </div>
 
-        <div className="p-6 space-y-5">
+        <FieldGroup className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <FormField
-              label="Start Date & Time"
-              required
-              error={formik.touched.date ? formik.errors.date : undefined}
-            >
-              <input
+            <Field data-invalid={hasError("date")}>
+              <FieldLabel htmlFor="date">
+                Start Date & Time <span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
                 id="date"
                 name="date"
                 type="datetime-local"
                 value={formik.values.date}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={fieldClass("date")}
+                aria-invalid={invalid("date")}
+                className="h-10 rounded-lg"
               />
-            </FormField>
+              <FieldError>{hasError("date") ? formik.errors.date : undefined}</FieldError>
+            </Field>
 
-            <FormField
-              label="End Date & Time"
-              error={formik.touched.endDate ? formik.errors.endDate : undefined}
-              hint="Optional"
-            >
-              <input
+            <Field>
+              <FieldLabel htmlFor="endDate">End Date & Time</FieldLabel>
+              <Input
                 id="endDate"
                 name="endDate"
                 type="datetime-local"
                 value={formik.values.endDate}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={fieldClass("endDate")}
+                className="h-10 rounded-lg"
               />
-            </FormField>
+              <FieldDescription>Optional</FieldDescription>
+            </Field>
           </div>
 
-          <FormField
-            label="Venue / Location"
-            required
-            error={formik.touched.location ? formik.errors.location : undefined}
-          >
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
-              <input
+          <Field data-invalid={hasError("location")}>
+            <FieldLabel htmlFor="location">
+              Venue / Location <span className="text-destructive">*</span>
+            </FieldLabel>
+            <InputGroup className="h-10">
+              <InputGroupAddon align="inline-start">
+                <MapPin className="size-4" />
+              </InputGroupAddon>
+              <InputGroupInput
                 id="location"
                 name="location"
                 type="text"
@@ -304,11 +335,12 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
                 value={formik.values.location}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                className={`${fieldClass("location")} pl-10`}
+                aria-invalid={invalid("location")}
               />
-            </div>
-          </FormField>
-        </div>
+            </InputGroup>
+            <FieldError>{hasError("location") ? formik.errors.location : undefined}</FieldError>
+          </Field>
+        </FieldGroup>
       </section>
 
       {/* ── Ticketing ─────────────────────────────────────────────────── */}
@@ -318,16 +350,17 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
           <h2 className="text-sm font-bold text-white">Ticketing</h2>
         </div>
 
-        <div className="p-6">
+        <FieldGroup className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <FormField
-              label="Price (XLM)"
-              required
-              error={formik.touched.price ? formik.errors.price : undefined}
-            >
-              <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
-                <input
+            <Field data-invalid={hasError("price")}>
+              <FieldLabel htmlFor="price">
+                Price (XLM) <span className="text-destructive">*</span>
+              </FieldLabel>
+              <InputGroup className="h-10">
+                <InputGroupAddon align="inline-start">
+                  <DollarSign className="size-4" />
+                </InputGroupAddon>
+                <InputGroupInput
                   id="price"
                   name="price"
                   type="number"
@@ -337,19 +370,21 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
                   value={formik.values.price}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={`${fieldClass("price")} pl-10`}
+                  aria-invalid={invalid("price")}
                 />
-              </div>
-            </FormField>
+              </InputGroup>
+              <FieldError>{hasError("price") ? formik.errors.price : undefined}</FieldError>
+            </Field>
 
-            <FormField
-              label="Total Seats"
-              required
-              error={formik.touched.capacity ? formik.errors.capacity : undefined}
-            >
-              <div className="relative">
-                <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
-                <input
+            <Field data-invalid={hasError("capacity")}>
+              <FieldLabel htmlFor="capacity">
+                Total Seats <span className="text-destructive">*</span>
+              </FieldLabel>
+              <InputGroup className="h-10">
+                <InputGroupAddon align="inline-start">
+                  <Users className="size-4" />
+                </InputGroupAddon>
+                <InputGroupInput
                   id="capacity"
                   name="capacity"
                   type="number"
@@ -360,21 +395,15 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
                     formik.setFieldValue("capacity", parseInt(e.target.value) || 0)
                   }
                   onBlur={formik.handleBlur}
-                  className={`${fieldClass("capacity")} pl-10`}
+                  aria-invalid={invalid("capacity")}
                 />
-              </div>
-            </FormField>
+              </InputGroup>
+              <FieldError>{hasError("capacity") ? formik.errors.capacity : undefined}</FieldError>
+            </Field>
 
-            <FormField
-              label="Max Resale Premium (%)"
-              error={
-                formik.touched.maxPremiumPctScaled
-                  ? formik.errors.maxPremiumPctScaled
-                  : undefined
-              }
-              hint="Anti-scalp cap (e.g. 15%)"
-            >
-              <input
+            <Field data-invalid={hasError("maxPremiumPctScaled")}>
+              <FieldLabel htmlFor="maxPremiumPctScaled">Max Resale Premium (%)</FieldLabel>
+              <Input
                 id="maxPremiumPctScaled"
                 name="maxPremiumPctScaled"
                 type="number"
@@ -390,11 +419,16 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
                   )
                 }
                 onBlur={formik.handleBlur}
-                className={fieldClass("maxPremiumPctScaled")}
+                aria-invalid={invalid("maxPremiumPctScaled")}
+                className="h-10 rounded-lg"
               />
-            </FormField>
+              <FieldDescription>Anti-scalp cap (e.g. 15%)</FieldDescription>
+              <FieldError>
+                {hasError("maxPremiumPctScaled") ? formik.errors.maxPremiumPctScaled : undefined}
+              </FieldError>
+            </Field>
           </div>
-        </div>
+        </FieldGroup>
       </section>
 
       {/* ── Images ────────────────────────────────────────────────────── */}
@@ -405,9 +439,9 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
           <span className="ml-auto text-xs text-zinc-500">URLs only · First image is the cover</span>
         </div>
 
-        <div className="p-6 space-y-4">
-          <div className="flex gap-2">
-            <input
+        <FieldGroup className="p-6">
+          <InputGroup className="h-10">
+            <InputGroupInput
               type="url"
               value={imageInput}
               onChange={(e) => setImageInput(e.target.value)}
@@ -415,16 +449,11 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
                 if (e.key === "Enter") { e.preventDefault(); addImage(); }
               }}
               placeholder="https://example.com/my-event-cover.jpg"
-              className="input-field flex-1"
             />
-            <button
-              type="button"
-              onClick={addImage}
-              className="px-4 py-2 rounded-lg bg-brand/15 border border-brand/30 text-brand text-sm font-semibold hover:bg-brand/25 transition-colors cursor-pointer shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
+            <InputGroupButton onClick={addImage} aria-label="Add image">
+              <Plus className="size-4" />
+            </InputGroupButton>
+          </InputGroup>
 
           {(formik.values.images ?? []).length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -434,23 +463,26 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
                   className="relative group rounded-xl overflow-hidden aspect-video bg-zinc-900 border border-zinc-800"
                 >
                   {i === 0 && (
-                    <div className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold px-1.5 py-0.5 rounded bg-brand/80 text-black">
+                    <Badge className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold px-1.5 py-0.5 bg-brand/80 text-black border-transparent">
                       COVER
-                    </div>
+                    </Badge>
                   )}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt="" className="w-full h-full object-cover" />
-                  <button
+                  <Button
                     type="button"
+                    size="icon"
                     onClick={() => removeImage(url)}
-                    className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-red-500/90 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    aria-label="Remove image"
+                    className="absolute top-1.5 right-1.5 size-5 rounded-full bg-red-500/90 text-white opacity-0 group-hover:opacity-100"
                   >
-                    <X className="w-3 h-3" />
-                  </button>
+                    <X className="size-3" />
+                  </Button>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </FieldGroup>
       </section>
 
       {/* ── Tags ──────────────────────────────────────────────────────── */}
@@ -461,9 +493,9 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
           <span className="ml-auto text-xs text-zinc-500">Press Enter or + to add</span>
         </div>
 
-        <div className="p-6 space-y-4">
-          <div className="flex gap-2">
-            <input
+        <FieldGroup className="p-6">
+          <InputGroup className="h-10">
+            <InputGroupInput
               type="text"
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
@@ -471,68 +503,50 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
                 if (e.key === "Enter") { e.preventDefault(); addTag(); }
               }}
               placeholder="e.g. blockchain, web3, lagos..."
-              className="input-field flex-1"
             />
-            <button
-              type="button"
-              onClick={addTag}
-              className="px-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-700 transition-colors cursor-pointer shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
+            <InputGroupButton onClick={addTag} aria-label="Add tag">
+              <Plus className="size-4" />
+            </InputGroupButton>
+          </InputGroup>
 
           {(formik.values.tags ?? []).length > 0 && (
             <div className="flex flex-wrap gap-2">
               {(formik.values.tags ?? []).map((tag) => (
-                <span
-                  key={tag}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs text-zinc-300 font-medium"
-                >
+                <Badge key={tag} variant="outline" className="gap-1.5 px-3 py-1 pr-1.5">
                   #{tag}
                   <button
                     type="button"
                     onClick={() => removeTag(tag)}
+                    aria-label={`Remove tag ${tag}`}
                     className="text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="size-3" />
                   </button>
-                </span>
+                </Badge>
               ))}
             </div>
           )}
-        </div>
+        </FieldGroup>
       </section>
 
       {/* ── Submit row ────────────────────────────────────────────────── */}
       {submitError && (
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/25 text-sm text-red-400">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>{submitError}</span>
-        </div>
+        <Alert variant="destructive" className="rounded-xl">
+          <AlertCircle className="size-4" />
+          <AlertTitle>Submission failed</AlertTitle>
+          <AlertDescription>{submitError}</AlertDescription>
+        </Alert>
       )}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         {/* Publish toggle */}
-        <label className="flex items-center gap-3 cursor-pointer select-none">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={formik.values.isPublished}
-            onClick={() => formik.setFieldValue("isPublished", !formik.values.isPublished)}
-            className={`relative w-11 h-6 rounded-full border transition-all cursor-pointer ${
-              formik.values.isPublished
-                ? "bg-brand/30 border-brand/50"
-                : "bg-zinc-800 border-zinc-700"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full shadow-sm transition-all duration-200 ${
-                formik.values.isPublished ? "translate-x-5 bg-brand" : "bg-zinc-500"
-              }`}
-            />
-          </button>
-          <div className="flex items-center gap-1.5 text-sm font-medium text-zinc-300">
+        <div className="flex items-center gap-3">
+          <Switch
+            id="isPublished"
+            checked={formik.values.isPublished}
+            onCheckedChange={(checked) => formik.setFieldValue("isPublished", checked)}
+          />
+          <label htmlFor="isPublished" className="flex items-center gap-1.5 text-sm font-medium text-zinc-300 cursor-pointer select-none">
             {formik.values.isPublished ? (
               <>
                 <Globe className="w-4 h-4 text-emerald-400" />
@@ -544,8 +558,8 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
                 Draft — not publicly visible
               </>
             )}
-          </div>
-        </label>
+          </label>
+        </div>
 
         <div className="flex gap-3 sm:ml-auto w-full sm:w-auto">
           <Button
@@ -564,7 +578,7 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
           >
             {formik.isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Spinner className="size-4" />
                 {isEditing ? "Saving..." : "Creating..."}
               </>
             ) : isEditing ? (
@@ -578,31 +592,3 @@ export const EventForm: React.FC<EventFormProps> = ({ initialData, eventId }) =>
     </form>
   );
 };
-
-// ── Reusable Field Wrapper ────────────────────────────────────────────────────
-const FormField: React.FC<{
-  label: string;
-  required?: boolean;
-  error?: string;
-  hint?: string;
-  children: React.ReactNode;
-}> = ({ label, required, error, hint, children }) => (
-  <div className="space-y-1.5">
-    <div className="flex items-center justify-between">
-      <label className="block text-xs font-semibold text-zinc-300">
-        {label}
-        {required && <span className="text-brand ml-0.5">*</span>}
-      </label>
-      {hint && !error && (
-        <span className="text-[11px] text-zinc-600">{hint}</span>
-      )}
-    </div>
-    {children}
-    {error && (
-      <p className="flex items-center gap-1.5 text-[11px] text-red-400 font-medium mt-1">
-        <AlertCircle className="w-3 h-3 shrink-0" />
-        {error}
-      </p>
-    )}
-  </div>
-);

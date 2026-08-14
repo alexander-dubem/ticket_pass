@@ -4,11 +4,25 @@ import { CalendarDays, Ticket, CheckCircle, Activity, ArrowUpRight } from "lucid
 import { useWallet } from "../../../context/WalletContext";
 import { DashboardHeader } from "../../../components/Dashboard/DashboardHeader";
 import { StatCard } from "../../../components/Dashboard/StatCard";
+import { Badge } from "../../../components/ui/badge";
+import { Skeleton } from "../../../components/ui/skeleton";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyTitle,
+} from "../../../components/ui/empty";
 
 interface UserStats {
   eventsOrganized: number;
   ticketsOwned: number;
   ticketsVerified: number;
+}
+
+function statusVariant(status: string) {
+  if (status === "VERIFIED") return "success" as const;
+  if (status === "MINTED") return "fuchsia" as const;
+  return "cyan" as const;
 }
 
 export default function OverviewPage() {
@@ -94,14 +108,21 @@ export default function OverviewPage() {
         {loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-12 bg-white/[0.05] rounded-xl animate-pulse" />
+              <Skeleton key={i} className="h-12 rounded-xl" />
             ))}
           </div>
         ) : recentTickets.length === 0 ? (
-          <div className="text-center py-10 text-zinc-600 text-sm">
-            No tickets yet. Purchase your first ticket from the{" "}
-            <a href="/" className="text-fuchsia-400 hover:underline">event drops</a>.
-          </div>
+          <Empty className="py-10">
+            <EmptyContent>
+              <EmptyTitle className="text-zinc-400 font-normal">
+                No tickets yet.
+              </EmptyTitle>
+              <EmptyDescription>
+                Purchase your first ticket from the{" "}
+                <a href="/" className="text-fuchsia-400">event drops</a>.
+              </EmptyDescription>
+            </EmptyContent>
+          </Empty>
         ) : (
           <ul className="space-y-3">
             {recentTickets.map((t: any) => (
@@ -115,17 +136,7 @@ export default function OverviewPage() {
                   </p>
                   <p className="text-zinc-500 text-[11px]">Ticket #{t.ticketId}</p>
                 </div>
-                <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                    t.status === "MINTED"
-                      ? "bg-fuchsia-500/15 border-fuchsia-500/30 text-fuchsia-300"
-                      : t.status === "VERIFIED"
-                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
-                      : "bg-blue-500/15 border-blue-500/30 text-blue-300"
-                  }`}
-                >
-                  {t.status}
-                </span>
+                <Badge variant={statusVariant(t.status)}>{t.status}</Badge>
               </li>
             ))}
           </ul>

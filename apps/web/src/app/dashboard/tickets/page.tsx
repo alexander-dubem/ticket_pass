@@ -1,9 +1,19 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Loader2, Ticket as TicketIcon, Filter } from "lucide-react";
+import { Ticket as TicketIcon } from "lucide-react";
 import { useWallet } from "../../../context/WalletContext";
 import { DashboardHeader } from "../../../components/Dashboard/DashboardHeader";
 import { TicketCard } from "../../../components/Dashboard/TicketCard";
+import { Spinner } from "../../../components/ui/spinner";
+import { Tabs, TabsList, TabsTrigger } from "../../../components/ui/tabs";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "../../../components/ui/empty";
 
 const STATUSES = ["ALL", "MINTED", "TRANSFERRED", "VERIFIED"];
 
@@ -34,45 +44,48 @@ export default function TicketsPage() {
       />
 
       {/* Filter tabs */}
-      <div className="flex items-center gap-2 mb-6 flex-wrap">
-        <Filter className="w-4 h-4 text-zinc-500 shrink-0" />
-        {STATUSES.map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
-            className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
-              filter === s
-                ? "bg-gradient-to-r from-pink-500/20 to-violet-500/20 border-fuchsia-500/40 text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.15)]"
-                : "bg-white/[0.03] border-white/10 text-zinc-500 hover:text-zinc-200 hover:border-white/25"
-            }`}
-          >
-            {s === "ALL"
-              ? `All (${tickets.length})`
-              : `${s} (${tickets.filter((t) => t.status === s).length})`}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={filter}
+        onValueChange={(value) => setFilter(String(value ?? "ALL"))}
+        className="mb-6"
+      >
+        <TabsList className="w-full sm:w-fit h-10 bg-white/[0.03] border border-white/10 rounded-lg p-1">
+          {STATUSES.map((s) => (
+            <TabsTrigger
+              key={s}
+              value={s}
+              className="text-xs font-semibold px-3 py-1.5 rounded-md data-active:bg-gradient-to-r data-active:from-pink-500/20 data-active:to-violet-500/20 data-active:border-fuchsia-500/40 data-active:text-fuchsia-300"
+            >
+              {s === "ALL"
+                ? `All (${tickets.length})`
+                : `${s} (${tickets.filter((t) => t.status === s).length})`}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <Loader2 className="w-8 h-8 text-fuchsia-500 animate-spin" />
+          <Spinner className="size-8 text-fuchsia-500" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="glass rounded-2xl border border-white/10 p-12 flex flex-col items-center text-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-violet-500/20 border border-fuchsia-500/30 flex items-center justify-center">
-            <TicketIcon className="w-8 h-8 text-fuchsia-400" />
-          </div>
-          <div>
-            <p className="text-white font-bold">
-              {filter === "ALL" ? "No tickets yet" : `No ${filter} tickets`}
-            </p>
-            <p className="text-zinc-500 text-sm mt-1">
-              {filter === "ALL"
-                ? "Purchase tickets from the event drops to see them here."
-                : "Try selecting a different filter."}
-            </p>
-          </div>
-        </div>
+        <Empty className="glass rounded-2xl border-white/10 p-12">
+          <EmptyHeader>
+            <EmptyMedia variant="icon" className="size-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-violet-500/20 border border-fuchsia-500/30">
+              <TicketIcon className="size-8 text-fuchsia-400" />
+            </EmptyMedia>
+            <EmptyContent>
+              <EmptyTitle className="text-base">
+                {filter === "ALL" ? "No tickets yet" : `No ${filter} tickets`}
+              </EmptyTitle>
+              <EmptyDescription>
+                {filter === "ALL"
+                  ? "Purchase tickets from the event drops to see them here."
+                  : "Try selecting a different filter."}
+              </EmptyDescription>
+            </EmptyContent>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((ticket) => (

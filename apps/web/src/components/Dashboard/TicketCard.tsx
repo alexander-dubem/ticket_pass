@@ -1,11 +1,14 @@
 import React from "react";
+import Image from "next/image";
 import { CalendarDays, MapPin, Hash, CheckCircle, ArrowRightLeft, Zap, Ticket } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
 
-const STATUS_STYLES: Record<string, string> = {
-  MINTED: "bg-fuchsia-500/15 border-fuchsia-500/30 text-fuchsia-300",
-  TRANSFERRED: "bg-blue-500/15 border-blue-500/30 text-blue-300",
-  VERIFIED: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
-  EXPIRED: "bg-zinc-700/30 border-zinc-600/30 text-zinc-500",
+const STATUS_VARIANT: Record<string, "fuchsia" | "cyan" | "success" | "outline"> = {
+  MINTED: "fuchsia",
+  TRANSFERRED: "cyan",
+  VERIFIED: "success",
+  EXPIRED: "outline",
 };
 
 const STATUS_ICONS: Record<string, React.ElementType> = {
@@ -47,7 +50,6 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket }) => {
   });
   const coverImg = event.images?.[0];
   const StatusIcon = STATUS_ICONS[ticket.status] ?? Hash;
-  const statusStyle = STATUS_STYLES[ticket.status] ?? STATUS_STYLES.EXPIRED;
   const grad = COVER_GRADIENTS[ticket.ticketId % COVER_GRADIENTS.length];
 
   return (
@@ -62,10 +64,12 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket }) => {
       {/* Cover */}
       <div className="h-36 relative overflow-hidden">
         {coverImg ? (
-          <img
+          <Image
             src={coverImg}
             alt={event.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
+            fill
+            sizes="(max-width: 768px) 100vw, 400px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
           />
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${grad} relative`}>
@@ -78,12 +82,13 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket }) => {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
         {/* Status badge */}
-        <div
-          className={`absolute top-3 right-3 flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border backdrop-blur-sm ${statusStyle}`}
+        <Badge
+          variant={STATUS_VARIANT[ticket.status] ?? "outline"}
+          className="absolute top-3 right-3 gap-1 backdrop-blur-sm"
         >
           <StatusIcon className="w-2.5 h-2.5" />
           {ticket.status}
-        </div>
+        </Badge>
         <div className="absolute bottom-2 left-3 text-[9px] font-mono text-white/60 tracking-widest">
           DRIP WAVE · {dateStr.toUpperCase()}
         </div>
@@ -110,9 +115,10 @@ export const TicketCard: React.FC<TicketCardProps> = ({ ticket }) => {
         </div>
 
         {ticket.txHash && (
-          <p className="text-[10px] font-mono text-zinc-600 truncate border-t border-white/10 pt-2">
+          <div className="text-[10px] font-mono text-zinc-600 truncate">
+            <Separator className="mb-2 bg-white/10" />
             tx: {ticket.txHash.substring(0, 20)}...
-          </p>
+          </div>
         )}
       </div>
     </div>

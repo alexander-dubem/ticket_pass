@@ -1,10 +1,19 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Loader2, CalendarDays } from "lucide-react";
+import { Plus, CalendarDays } from "lucide-react";
 import { useWallet } from "../../../context/WalletContext";
 import { EventCard } from "../../../components/Dashboard/EventCard";
 import { Button } from "../../../components/ui/button";
+import { Spinner } from "../../../components/ui/spinner";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "../../../components/ui/empty";
 
 export default function EventsPage() {
   const { address, apiFetch } = useWallet();
@@ -40,26 +49,28 @@ export default function EventsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <Loader2 className="w-8 h-8 text-fuchsia-500 animate-spin" />
+          <Spinner className="size-8 text-fuchsia-500" />
         </div>
       ) : events.length === 0 ? (
-        <div className="glass rounded-2xl border border-white/10 p-12 flex flex-col items-center text-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-violet-500/20 border border-fuchsia-500/30 flex items-center justify-center">
-            <CalendarDays className="w-8 h-8 text-fuchsia-400" />
-          </div>
-          <div>
-            <p className="text-white font-bold">No events yet</p>
-            <p className="text-zinc-500 text-sm mt-1">
-              Create your first on-chain ticket drop event to get started.
-            </p>
-          </div>
-          <Link href="/dashboard/events/new">
-            <Button variant="glow" className="gap-2 cursor-pointer">
-              <Plus className="w-4 h-4" />
-              Create Event
-            </Button>
-          </Link>
-        </div>
+        <Empty className="glass rounded-2xl border-white/10 p-12">
+          <EmptyHeader>
+            <EmptyMedia variant="icon" className="size-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-violet-500/20 border border-fuchsia-500/30">
+              <CalendarDays className="size-8 text-fuchsia-400" />
+            </EmptyMedia>
+            <EmptyContent>
+              <EmptyTitle className="text-base">No events yet</EmptyTitle>
+              <EmptyDescription>
+                Create your first on-chain ticket drop event to get started.
+              </EmptyDescription>
+              <Link href="/dashboard/events/new">
+                <Button variant="glow" className="gap-2 cursor-pointer">
+                  <Plus className="w-4 h-4" />
+                  Create Event
+                </Button>
+              </Link>
+            </EmptyContent>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {events.map((event) => (
