@@ -41,17 +41,7 @@ export default function VerifyPage() {
           method: 'POST',
         });
       } catch (err) {
-        console.warn('Backend API connection offline. Performing local fallback validation.');
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        result = {
-          success: true,
-          ticket: {
-            ticketId: decodedPayload.ticketId,
-            eventId: decodedPayload.eventId,
-            ownerAddress: decodedPayload.ownerAddress,
-            status: 'VERIFIED',
-          }
-        };
+        throw new Error('Backend verification failed. Please ensure the API is running and try again.');
       }
 
       setValidationResult({

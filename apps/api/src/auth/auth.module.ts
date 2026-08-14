@@ -8,7 +8,7 @@ import { PrismaService } from '../prisma.service';
   imports: [
     JwtModule.register({
       global: true,
-      secret: process.env.SECRET_SEP10_JWT_SECRET || 'fallback-jwt-secret-for-dev',
+      secret: process.env.SECRET_SEP10_JWT_SECRET,
       signOptions: { expiresIn: '24h' },
     }),
   ],

@@ -15,10 +15,7 @@ export class AuthService {
     if (seed) {
       this.serverKeypair = Keypair.fromSecret(seed);
     } else {
-      // Fallback keypair for dev environment
-      const devKeypair = Keypair.random();
-      this.serverKeypair = devKeypair;
-      console.warn('WARNING: SECRET_SEP10_SIGNING_SEED is not set. Generated dynamic dev keypair:', devKeypair.publicKey());
+      throw new Error('SECRET_SEP10_SIGNING_SEED environment variable is required for SEP-10 authentication.');
     }
   }
 

@@ -47,7 +47,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   // Shared SEP-10 authentication: fetch challenge -> sign -> exchange for a JWT.
-  // Throws on failure (callers decide whether to fall back to a mock token).
+  // Throws on failure.
   const sep10Authenticate = async (userAddress: string): Promise<string> => {
     const chalRes = await fetch(`${BACKEND_URL}/auth/challenge?address=${userAddress}`);
     if (!chalRes.ok) throw new Error('Backend offline');
@@ -108,14 +108,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const userAddress = walletRes.address;
 
       // 2. SEP-10 authentication (challenge + sign + login) to get a real JWT
-      let jwtToken: string;
-      try {
-        jwtToken = await sep10Authenticate(userAddress);
-      } catch (err: any) {
-        if (err.message !== 'Backend offline') throw err;
-        console.warn('Backend connection failed, using client-side mock challenge fallback for demonstration.');
-        jwtToken = 'mock_jwt_token_' + Math.random().toString(36).substring(7);
-      }
+      const jwtToken = await sep10Authenticate(userAddress);
 
       // Save credentials
       setAddress(userAddress);
@@ -138,14 +131,7 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const userAddress = walletRes.address;
 
       // 2. SEP-10 authentication (challenge + sign + login) to get a real JWT
-      let jwtToken: string;
-      try {
-        jwtToken = await sep10Authenticate(userAddress);
-      } catch (err: any) {
-        if (err.message !== 'Backend offline') throw err;
-        console.warn('Backend connection failed, using client-side mock challenge fallback for demonstration.');
-        jwtToken = 'mock_jwt_token_' + Math.random().toString(36).substring(7);
-      }
+      const jwtToken = await sep10Authenticate(userAddress);
 
       // Save credentials
       setAddress(userAddress);

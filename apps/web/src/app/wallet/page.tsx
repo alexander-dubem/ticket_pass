@@ -29,25 +29,6 @@ interface Ticket {
   };
 }
 
-const MOCK_TICKETS: Ticket[] = [
-  {
-    id: 't1',
-    eventId: '1',
-    ownerAddress: 'G...MOCK',
-    ticketId: 104,
-    txHash: 'tx_df24a1b028c94982',
-    status: 'MINTED',
-    event: {
-      title: 'Neon Bloom Festival',
-      description: 'Three nights of immersive art, live DJs and fireworks under the Lagos sky.',
-      date: new Date(Date.now() + 86400000 * 5).toISOString(),
-      price: '25',
-      maxPremiumPctScaled: 150,
-      contractAddress: 'CCZ...MNT'
-    }
-  }
-];
-
 const TICKET_GRADIENTS = [
   'from-rose-500 via-pink-500 to-fuchsia-500',
   'from-violet-500 via-purple-500 to-cyan-400',
@@ -80,9 +61,10 @@ export default function WalletPage() {
       setIsLoading(true);
       try {
         const data = await apiFetch(`/events/tickets?address=${address}`);
-        setTickets(data);
+        setTickets(Array.isArray(data) ? data : []);
       } catch (err) {
-        setTickets(MOCK_TICKETS);
+        console.error('Failed to load tickets:', err);
+        setTickets([]);
       } finally {
         setIsLoading(false);
       }
@@ -359,7 +341,7 @@ export default function WalletPage() {
                   {isSigningManifest ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Signing Dummy Payload...
+                      Signing Entry Token...
                     </>
                   ) : (
                     'Generate Signed Entry Token'

@@ -28,45 +28,6 @@ interface Event {
   _count?: { tickets: number };
 }
 
-const MOCK_EVENTS: Event[] = [
-  {
-    id: '1',
-    title: 'Neon Bloom Festival',
-    description: 'Three nights of immersive art, live DJs and fireworks under the Lagos sky. A celebration you won’t forget.',
-    date: new Date(Date.now() + 86400000 * 5).toISOString(),
-    price: '25',
-    capacity: 250,
-    maxPremiumPctScaled: 150,
-    contractAddress: 'CCZ...MNT',
-    images: ['https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=800&q=80'],
-    _count: { tickets: 182 },
-  },
-  {
-    id: '2',
-    title: 'Champagne & Roses Wedding Gala',
-    description: 'A black-tie celebration of love — golden-hour toasts, live band, and dancing until sunrise in Bali.',
-    date: new Date(Date.now() + 86400000 * 12).toISOString(),
-    price: '15',
-    capacity: 150,
-    maxPremiumPctScaled: 200,
-    contractAddress: 'CCY...HZN',
-    images: ['https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80'],
-    _count: { tickets: 145 },
-  },
-  {
-    id: '3',
-    title: 'Stellar Afterparty Summit',
-    description: 'The official crypto celebration after the Soroban Dev Summit. Builders, beats and bad vibes banned.',
-    date: new Date(Date.now() + 86400000 * 20).toISOString(),
-    price: '40',
-    capacity: 500,
-    maxPremiumPctScaled: 100,
-    contractAddress: 'CCX...DEV',
-    images: ['https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80'],
-    _count: { tickets: 120 },
-  },
-];
-
 const CARD_GRADIENTS = [
   'from-rose-500 via-pink-500 to-fuchsia-500',
   'from-violet-500 via-purple-500 to-cyan-400',
@@ -108,18 +69,22 @@ function Countdown({ date }: { date: string }) {
 
 export default function HomePage() {
   const { apiFetch } = useWallet();
-  const [events, setEvents] = useState<Event[]>(MOCK_EVENTS);
+  const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadEvents() {
       try {
         const data = await apiFetch('/events');
-        if (data && data.length > 0) {
+        if (data && Array.isArray(data)) {
           setEvents(data);
+        } else {
+          setEvents([]);
         }
       } catch (err) {
-        console.log('Using fallback mock event data since local database API is not running.');
+        setError('Unable to load events. Please ensure the backend API is running.');
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
@@ -146,6 +111,19 @@ export default function HomePage() {
           </span>
           <p className="text-sm text-zinc-500">Warming up the stage…</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mesh-bg flex flex-col min-h-screen">
+        <Header />
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-4">
+          <p className="text-zinc-500 text-lg">{error}</p>
+          <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+        <Footer />
       </div>
     );
   }

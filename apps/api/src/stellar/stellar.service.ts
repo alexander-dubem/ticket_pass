@@ -12,9 +12,7 @@ export class StellarService implements OnModuleInit {
     if (sponsorSeed) {
       this.sponsorKeypair = Keypair.fromSecret(sponsorSeed);
     } else {
-      const devSponsor = Keypair.random();
-      this.sponsorKeypair = devSponsor;
-      console.warn('WARNING: SPONSOR_SECRET_KEY is not set. Generated random sponsor key:', devSponsor.publicKey());
+      throw new Error('SPONSOR_SECRET_KEY environment variable is required for fee-bump transaction sponsorship.');
     }
   }
 
@@ -106,18 +104,11 @@ export class StellarService implements OnModuleInit {
       feeBumpTx.sign(this.sponsorKeypair);
       console.log('Outer Tx XDR:', feeBumpTx.toXDR());
       console.log(`Dispatched transaction using Channel Account ${channelAddress}. Sponsor Funded Fee.`);
+      return feeBumpTx.toXDR();
     } catch (err: any) {
-      // Dev/demo mode: the inner XDR may be a placeholder or otherwise unparseable
-      // (e.g. the client hasn't submitted a real Soroban payload yet). Simulate the
-      // dispatch instead of crashing with a 500.
-      console.warn('Transaction dispatch simulation fallback (invalid/mock inner XDR):', err.message);
+      throw new Error(`Transaction dispatch failed: ${err.message}`);
     } finally {
-      // Always return channel account back to pool
       await this.returnChannel(channelAddress);
     }
-
-    // Simulated response hash for local testing/dev
-    const mockTxHash = 'tx_' + Buffer.from(Math.random().toString() + Date.now().toString()).toString('hex').substring(0, 16);
-    return mockTxHash;
   }
 }

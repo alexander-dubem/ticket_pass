@@ -23,45 +23,6 @@ interface Event {
   _count?: { tickets: number };
 }
 
-const MOCK_EVENTS: Record<string, Event> = {
-  '1': {
-    id: '1',
-    title: 'Neon Bloom Festival',
-    description: 'Three nights of immersive art, live DJs and fireworks under the Lagos sky. A celebration you won’t forget.',
-    date: new Date(Date.now() + 86400000 * 5).toISOString(),
-    price: '25',
-    capacity: 250,
-    maxPremiumPctScaled: 150,
-    contractAddress: 'CCZ...MNT',
-    images: ['https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1200&q=80'],
-    _count: { tickets: 182 },
-  },
-  '2': {
-    id: '2',
-    title: 'Champagne & Roses Wedding Gala',
-    description: 'A black-tie celebration of love — golden-hour toasts, live band, and dancing until sunrise in Bali.',
-    date: new Date(Date.now() + 86400000 * 12).toISOString(),
-    price: '15',
-    capacity: 150,
-    maxPremiumPctScaled: 200,
-    contractAddress: 'CCY...HZN',
-    images: ['https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80'],
-    _count: { tickets: 145 },
-  },
-  '3': {
-    id: '3',
-    title: 'Stellar Afterparty Summit',
-    description: 'The official crypto celebration after the Soroban Dev Summit. Builders, beats and bad vibes banned.',
-    date: new Date(Date.now() + 86400000 * 20).toISOString(),
-    price: '40',
-    capacity: 500,
-    maxPremiumPctScaled: 100,
-    contractAddress: 'CCX...DEV',
-    images: ['https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80'],
-    _count: { tickets: 120 },
-  },
-};
-
 const HERO_GRADIENTS: Record<string, string> = {
   '1': 'from-rose-500 via-pink-500 to-fuchsia-500',
   '2': 'from-violet-500 via-purple-500 to-cyan-400',
@@ -111,13 +72,12 @@ export default function EventDetailsPage() {
         const data = await apiFetch(`/events/${id}`);
         if (data) {
           setEvent(data);
+        } else {
+          setEvent(null);
         }
       } catch (err) {
-        // Fallback to mock data if API is offline
-        const mockEv = MOCK_EVENTS[id];
-        if (mockEv) {
-          setEvent(mockEv);
-        }
+        console.error('Failed to load event:', err);
+        setEvent(null);
       } finally {
         setIsLoading(false);
       }
@@ -133,23 +93,10 @@ export default function EventDetailsPage() {
 
     setIsMinting(true);
     try {
-      const dummyInnerTxXdr = 'AAAAAgAAAAD...user_signed_inner_contract_payload_XDR...';
-
-      let result;
-      try {
-        result = await apiFetch(`/events/${id}/purchase`, {
-          method: 'POST',
-          body: JSON.stringify({ xdr: dummyInnerTxXdr }),
-        });
-      } catch (err) {
-        console.warn('Backend connection failed. Simulating on-chain transaction verification.');
-        await new Promise(resolve => setTimeout(resolve, 2500));
-        result = {
-          success: true,
-          txHash: 'tx_' + Buffer.from(Math.random().toString()).toString('hex').substring(0, 16),
-          ticket: { ticketId: (event?._count?.tickets || 0) + 1 }
-        };
-      }
+      const result = await apiFetch(`/events/${id}/purchase`, {
+        method: 'POST',
+        body: JSON.stringify({ xdr: '' }),
+      });
 
       setMintResult({
         txHash: result.txHash,
