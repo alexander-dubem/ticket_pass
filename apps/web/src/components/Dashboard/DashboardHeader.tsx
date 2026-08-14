@@ -19,13 +19,14 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
       <div>
-        <h1 className="text-2xl font-black text-white tracking-tight">{title}</h1>
+        <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">{title}</h1>
         {subtitle && (
-          <p className="text-sm text-zinc-500 mt-0.5">{subtitle}</p>
+          <p className="text-sm text-zinc-500 mt-1">{subtitle}</p>
         )}
       </div>
       {address && (
-        <span className="self-start sm:self-center text-xs font-mono bg-zinc-900 border border-zinc-800 text-zinc-400 px-3 py-1.5 rounded-lg">
+        <span className="self-start sm:self-center inline-flex items-center gap-1.5 text-xs font-mono bg-white/[0.05] border border-white/10 text-zinc-300 px-3 py-1.5 rounded-lg">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           {truncate(address)}
         </span>
       )}

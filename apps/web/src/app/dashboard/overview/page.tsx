@@ -55,6 +55,7 @@ export default function OverviewPage() {
           icon={CalendarDays}
           loading={loading}
           trend="All-time"
+          gradient="from-pink-500 to-fuchsia-600"
         />
         <StatCard
           label="Tickets Owned"
@@ -62,6 +63,7 @@ export default function OverviewPage() {
           icon={Ticket}
           loading={loading}
           trend="In your wallet"
+          gradient="from-violet-500 to-indigo-600"
         />
         <StatCard
           label="Tickets Verified"
@@ -70,19 +72,20 @@ export default function OverviewPage() {
           loading={loading}
           trend="Check-ins completed"
           trendUp={(stats?.ticketsVerified ?? 0) > 0}
+          gradient="from-emerald-400 to-cyan-500"
         />
       </div>
 
       {/* Recent Tickets */}
-      <div className="glass rounded-2xl border border-zinc-800/60 p-6">
+      <div className="glass rounded-2xl border border-white/10 p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-sm font-bold text-white flex items-center gap-2">
-            <Activity className="w-4 h-4 text-brand" />
+            <Activity className="w-4 h-4 text-fuchsia-400" />
             Recent Tickets
           </h2>
           <a
             href="/dashboard/tickets"
-            className="text-xs text-brand hover:text-brand-hover flex items-center gap-1 transition-colors"
+            className="text-xs text-fuchsia-400 hover:text-fuchsia-300 flex items-center gap-1 transition-colors"
           >
             View all <ArrowUpRight className="w-3.5 h-3.5" />
           </a>
@@ -91,20 +94,20 @@ export default function OverviewPage() {
         {loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-12 bg-zinc-800/40 rounded-xl animate-pulse" />
+              <div key={i} className="h-12 bg-white/[0.05] rounded-xl animate-pulse" />
             ))}
           </div>
         ) : recentTickets.length === 0 ? (
           <div className="text-center py-10 text-zinc-600 text-sm">
             No tickets yet. Purchase your first ticket from the{" "}
-            <a href="/" className="text-brand hover:underline">event drops</a>.
+            <a href="/" className="text-fuchsia-400 hover:underline">event drops</a>.
           </div>
         ) : (
           <ul className="space-y-3">
             {recentTickets.map((t: any) => (
               <li
                 key={t.id}
-                className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/40 border border-zinc-800/40 text-sm"
+                className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/10 text-sm"
               >
                 <div>
                   <p className="font-semibold text-white text-xs leading-tight">
@@ -115,10 +118,10 @@ export default function OverviewPage() {
                 <span
                   className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                     t.status === "MINTED"
-                      ? "bg-brand/10 border-brand/25 text-brand"
+                      ? "bg-fuchsia-500/15 border-fuchsia-500/30 text-fuchsia-300"
                       : t.status === "VERIFIED"
-                      ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400"
-                      : "bg-blue-500/10 border-blue-500/25 text-blue-400"
+                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300"
+                      : "bg-blue-500/15 border-blue-500/30 text-blue-300"
                   }`}
                 >
                   {t.status}

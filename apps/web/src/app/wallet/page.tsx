@@ -1,12 +1,13 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Header } from '../../components/Header';
+import { Footer } from '../../components/Footer';
 import { Card, CardDescription } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import { useWallet } from '../../context/WalletContext';
-import { Calendar, User, ArrowRightLeft, ShieldCheck, Loader2, ArrowRight, Wallet } from 'lucide-react';
+import { Calendar, User, ArrowRightLeft, ShieldCheck, Loader2, ArrowRight, Wallet, Coins, QrCode } from 'lucide-react';
 import Link from 'next/link';
 
 interface Ticket {
@@ -35,14 +36,21 @@ const MOCK_TICKETS: Ticket[] = [
     txHash: 'tx_df24a1b028c94982',
     status: 'MINTED',
     event: {
-      title: 'Ticket Pass Genesis Drop',
-      description: 'The exclusive launch event for Ticket Pass with top Web3 artists and live DJs in Lisbon.',
+      title: 'Neon Bloom Festival',
+      description: 'Three nights of immersive art, live DJs and fireworks under the Lagos sky.',
       date: new Date(Date.now() + 86400000 * 5).toISOString(),
       price: '25',
       maxPremiumPctScaled: 150,
       contractAddress: 'CCZ...MNT'
     }
   }
+];
+
+const TICKET_GRADIENTS = [
+  'from-rose-500 via-pink-500 to-fuchsia-500',
+  'from-violet-500 via-purple-500 to-cyan-400',
+  'from-amber-400 via-rose-500 to-pink-500',
+  'from-cyan-400 via-sky-500 to-violet-500',
 ];
 
 export default function WalletPage() {
@@ -120,14 +128,14 @@ export default function WalletPage() {
     setIsSigningManifest(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       const payload = {
         eventId: verificationTicket.eventId,
         ticketId: verificationTicket.ticketId,
         ownerAddress: address,
         timestamp: Date.now()
       };
-      
+
       const manifestStr = btoa(JSON.stringify(payload));
       setSignedManifest(manifestStr);
     } catch (err: any) {
@@ -139,14 +147,15 @@ export default function WalletPage() {
 
   if (!address) {
     return (
-      <div className="flex flex-col min-h-screen">
+      <div className="mesh-bg flex flex-col min-h-screen">
         <Header />
         <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center px-4 relative z-10">
-          {/* Background Glows */}
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand/5 rounded-full blur-[100px] pointer-events-none animate-pulse-slow"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-600/5 rounded-full blur-[100px] pointer-events-none animate-pulse-slow"></div>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-[110px] pointer-events-none animate-pulse-slow"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[110px] pointer-events-none animate-pulse-slow"></div>
 
-          <LandmarkIcon className="w-16 h-16 text-zinc-600" />
+          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 via-fuchsia-500 to-violet-500 glow-brand">
+            <Wallet className="w-8 h-8 text-white" />
+          </span>
           <h2 className="text-2xl font-bold text-white">Your Wallet is Disconnected</h2>
           <p className="text-zinc-400 max-w-sm">Connect your Freighter or Albedo wallet to view your minted tickets and active check-ins.</p>
           <Link href="/auth?redirect=/wallet" className="mt-2">
@@ -156,18 +165,21 @@ export default function WalletPage() {
             </Button>
           </Link>
         </div>
+
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="mesh-bg flex flex-col min-h-screen">
       <Header />
-      
+
       <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl relative z-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold text-white tracking-tight">My Ticket Wallet</h1>
+            <Badge variant="pink" className="mb-2">🎟️ Your passes</Badge>
+            <h1 className="text-3xl font-black text-white tracking-tight">My Ticket Wallet</h1>
             <p className="text-sm text-zinc-400 mt-1">Manage, resell, or generate gate entry credentials for your tickets</p>
           </div>
           <Badge variant="cyan" className="font-mono">Stellar Testnet</Badge>
@@ -175,10 +187,10 @@ export default function WalletPage() {
 
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="w-10 h-10 text-brand animate-spin" />
+            <Loader2 className="w-10 h-10 text-fuchsia-500 animate-spin" />
           </div>
         ) : tickets.length === 0 ? (
-          <Card className="glass border-zinc-800 p-12 text-center">
+          <Card className="glass border-white/10 p-12 text-center">
             <CardDescription className="text-zinc-500 text-lg mb-6">No tickets found in this wallet.</CardDescription>
             <Link href="/">
               <Button variant="glow" className="gap-2">
@@ -189,12 +201,15 @@ export default function WalletPage() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {tickets.map((ticket) => (
-              <div key={ticket.id} className="glass rounded-xl overflow-hidden border border-zinc-800/80 flex flex-col md:flex-row relative">
+            {tickets.map((ticket, i) => (
+              <div key={ticket.id} className="glass-strong rounded-2xl overflow-hidden border border-white/10 flex flex-col md:flex-row relative shadow-xl">
+                {/* Gradient side band */}
+                <div className={`hidden md:block w-2 shrink-0 bg-gradient-to-b ${TICKET_GRADIENTS[i % TICKET_GRADIENTS.length]}`} />
+
                 {/* Visual Ticket Body */}
                 <div className="flex-1 p-6 space-y-4">
                   <div className="flex justify-between items-start">
-                    <Badge variant={ticket.status === 'VERIFIED' ? "success" : "cyan"}>
+                    <Badge variant={ticket.status === 'VERIFIED' ? "success" : "gradient"}>
                       Ticket #{ticket.ticketId} • {ticket.status}
                     </Badge>
                     <span className="text-[10px] font-mono text-zinc-500">UID: {ticket.id}</span>
@@ -205,29 +220,39 @@ export default function WalletPage() {
                     <p className="text-sm text-zinc-400 mt-1 line-clamp-1">{ticket.event.description}</p>
                   </div>
 
-                  <div className="flex flex-wrap gap-4 text-xs text-zinc-400 pt-2 border-t border-zinc-900">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5 text-brand" />
+                  <div className="flex flex-wrap gap-4 text-xs text-zinc-400 pt-3 border-t border-white/10">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-fuchsia-400" />
                       {new Date(ticket.event.date).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <User className="w-3.5 h-3.5 text-cyan-500" />
+                    <span className="flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-cyan-400" />
                       Owner: {ticket.ownerAddress.substring(0, 8)}...
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Coins className="w-3.5 h-3.5 text-amber-400" />
+                      {ticket.event.price} XLM
                     </span>
                   </div>
                 </div>
 
                 {/* Ticket Tear-Line Separator */}
                 <div className="hidden md:flex flex-col justify-between py-2 relative w-6">
-                  <div className="w-6 h-6 rounded-full bg-background border-r border-b border-zinc-800 -mt-5 -ml-3"></div>
-                  <div className="h-full border-l-2 border-dashed border-zinc-800 ml-3 my-2"></div>
-                  <div className="w-6 h-6 rounded-full bg-background border-r border-t border-zinc-800 -mb-5 -ml-3"></div>
+                  <div className="w-6 h-6 rounded-full bg-background border-r border-b border-white/15 -mt-5 -ml-3"></div>
+                  <div className="h-full border-l-2 border-dashed border-white/15 ml-3 my-2"></div>
+                  <div className="w-6 h-6 rounded-full bg-background border-r border-t border-white/15 -mb-5 -ml-3"></div>
                 </div>
 
-                {/* Ticket Stub Actions */}
-                <div className="bg-zinc-950/40 p-6 flex flex-col justify-center gap-3 border-t md:border-t-0 md:border-l border-zinc-800/80 md:w-56">
+                {/* Ticket Stub — barcode + actions */}
+                <div className="bg-white/[0.03] p-6 flex flex-col justify-center gap-3 border-t md:border-t-0 md:border-l border-white/10 md:w-56">
+                  <div className="hidden md:flex flex-col items-center gap-1.5 mb-1">
+                    <div className="barcode text-zinc-400 h-8 w-full opacity-70" />
+                    <span className="flex items-center gap-1 text-[9px] font-mono text-zinc-500 tracking-widest">
+                      <QrCode className="w-3 h-3 text-fuchsia-400" /> GATE SCAN
+                    </span>
+                  </div>
                   <Button
-                    variant="default"
+                    variant="glow"
                     size="sm"
                     className="w-full gap-2"
                     onClick={() => {
@@ -241,7 +266,7 @@ export default function WalletPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full gap-2 border-zinc-800 hover:bg-zinc-900"
+                    className="w-full gap-2"
                     onClick={() => setSelectedTicket(ticket)}
                     disabled={ticket.status === 'VERIFIED'}
                   >
@@ -270,13 +295,13 @@ export default function WalletPage() {
                   <p className="text-white font-semibold">{selectedTicket.event.title} (#{selectedTicket.ticketId})</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10">
                     <p className="text-zinc-500 text-xs uppercase font-medium">Original Price</p>
-                    <p className="text-white font-mono">{selectedTicket.event.price} XLM</p>
+                    <p className="text-white font-mono mt-1">{selectedTicket.event.price} XLM</p>
                   </div>
-                  <div>
+                  <div className="p-3 rounded-xl bg-white/[0.04] border border-white/10">
                     <p className="text-zinc-500 text-xs uppercase font-medium">Max Resale Price</p>
-                    <p className="text-emerald-400 font-mono">
+                    <p className="text-gradient font-mono mt-1 font-bold">
                       {(parseFloat(selectedTicket.event.price) * (1 + selectedTicket.event.maxPremiumPctScaled / 1000)).toFixed(2)} XLM
                     </p>
                   </div>
@@ -289,7 +314,7 @@ export default function WalletPage() {
                     value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}
                     placeholder="Stellar address (G...)"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-brand font-mono"
+                    className="w-full input-field font-mono text-xs"
                   />
                 </div>
 
@@ -300,7 +325,7 @@ export default function WalletPage() {
                     value={priceInput}
                     onChange={(e) => setPriceInput(e.target.value)}
                     placeholder="Enter resale price"
-                    className="w-full bg-zinc-950 border border-zinc-800 rounded px-3 py-2 text-white font-mono text-xs focus:outline-none focus:ring-1 focus:ring-brand font-mono"
+                    className="w-full input-field font-mono text-xs"
                   />
                 </div>
               </div>
@@ -338,14 +363,17 @@ export default function WalletPage() {
                 </Button>
               ) : (
                 <div className="space-y-4 w-full">
-                  <div className="w-48 h-48 bg-zinc-900 border border-zinc-800 rounded-xl mx-auto flex items-center justify-center p-4">
-                    <div className="grid grid-cols-6 gap-1 w-full h-full opacity-80">
+                  <div className="relative w-48 h-48 rounded-2xl mx-auto overflow-hidden border border-white/15 bg-gradient-to-br from-zinc-900 to-zinc-950 flex items-center justify-center p-4">
+                    <div className="grid grid-cols-6 gap-1 w-full h-full opacity-90">
                       {Array.from({ length: 36 }).map((_, i) => (
-                        <div key={i} className={`rounded-sm ${Math.random() > 0.4 ? 'bg-white' : 'bg-transparent'}`}></div>
+                        <div key={i} className={`rounded-sm ${i % 3 === 0 ? 'bg-fuchsia-400' : Math.random() > 0.4 ? 'bg-white' : 'bg-transparent'}`}></div>
                       ))}
                     </div>
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      <div className="absolute left-0 right-0 h-10 bg-gradient-to-b from-cyan-400/40 to-transparent animate-scan-line" />
+                    </div>
                   </div>
-                  <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-800/80">
+                  <div className="bg-zinc-950/70 p-3 rounded-lg border border-white/10">
                     <p className="text-[10px] text-zinc-500 text-left font-mono truncate">Manifest: {signedManifest}</p>
                   </div>
                   <p className="text-xs text-zinc-400">Scan this token on the Gate Validator screen to complete check-in.</p>
@@ -355,33 +383,8 @@ export default function WalletPage() {
           </DialogContent>
         </Dialog>
       </main>
-    </div>
-  );
-}
 
-function LandmarkIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <line x1="3" y1="21" x2="21" y2="21" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-      <line x1="5" y1="6" x2="19" y2="6" />
-      <line x1="4" y1="2" x2="20" y2="2" />
-      <path d="M4 10v11" />
-      <path d="M20 10v11" />
-      <path d="M8 10v11" />
-      <path d="M12 10v11" />
-      <path d="M16 10v11" />
-    </svg>
+      <Footer />
+    </div>
   );
 }

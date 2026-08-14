@@ -58,14 +58,14 @@ export default function ProfilePage() {
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <Loader2 className="w-8 h-8 text-brand animate-spin" />
+          <Loader2 className="w-8 h-8 text-fuchsia-500 animate-spin" />
         </div>
       ) : (
         <div className="space-y-4">
           {/* Avatar + Name */}
-          <div className="glass rounded-2xl border border-zinc-800/60 p-6 flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center shrink-0">
-              <User className="w-8 h-8 text-brand" />
+          <div className="glass rounded-2xl border border-white/10 p-6 flex items-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 via-fuchsia-500 to-violet-500 flex items-center justify-center shrink-0 glow-brand">
+              <User className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1 min-w-0">
               {editing ? (
@@ -121,11 +121,11 @@ export default function ProfilePage() {
           </div>
 
           {/* Wallet Address */}
-          <div className="glass rounded-2xl border border-zinc-800/60 p-6 space-y-3">
+          <div className="glass rounded-2xl border border-white/10 p-6 space-y-3">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
               Wallet Address
             </h3>
-            <div className="flex items-center gap-3 p-3 bg-zinc-900/60 rounded-xl border border-zinc-800/60">
+            <div className="flex items-center gap-3 p-3 bg-white/[0.04] rounded-xl border border-white/10">
               <p className="text-xs font-mono text-zinc-300 flex-1 break-all">
                 {address}
               </p>
@@ -144,11 +144,11 @@ export default function ProfilePage() {
           </div>
 
           {/* Stats */}
-          <div className="glass rounded-2xl border border-zinc-800/60 p-6 space-y-3">
+          <div className="glass rounded-2xl border border-white/10 p-6 space-y-3">
             <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
               Activity Stats
             </h3>
-            <div className="grid grid-cols-3 divide-x divide-zinc-800/60">
+            <div className="grid grid-cols-3 divide-x divide-white/10">
               {[
                 { label: "Events", value: profile?.stats?.eventsOrganized ?? 0 },
                 { label: "Tickets", value: profile?.stats?.ticketsOwned ?? 0 },

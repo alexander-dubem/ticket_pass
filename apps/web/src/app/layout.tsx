@@ -9,8 +9,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'Ticket Pass - Decentralized Stellar Ticketing',
-  description: 'High-throughput anti-scalping ticket drops powered by Stellar and Soroban.',
+  title: 'Ticket Pass — Celebrate On-Chain',
+  description: 'Modern decentralized ticketing for festivals, weddings and celebrations. Anti-scalp ticket drops powered by Stellar and Soroban.',
 };
 
 export default function RootLayout({

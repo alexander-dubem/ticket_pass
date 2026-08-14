@@ -42,8 +42,8 @@ export default function TicketsPage() {
             onClick={() => setFilter(s)}
             className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-all cursor-pointer ${
               filter === s
-                ? "bg-brand/15 border-brand/30 text-brand"
-                : "bg-zinc-900/40 border-zinc-800/60 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700"
+                ? "bg-gradient-to-r from-pink-500/20 to-violet-500/20 border-fuchsia-500/40 text-fuchsia-300 shadow-[0_0_12px_rgba(217,70,239,0.15)]"
+                : "bg-white/[0.03] border-white/10 text-zinc-500 hover:text-zinc-200 hover:border-white/25"
             }`}
           >
             {s === "ALL"
@@ -55,12 +55,12 @@ export default function TicketsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <Loader2 className="w-8 h-8 text-brand animate-spin" />
+          <Loader2 className="w-8 h-8 text-fuchsia-500 animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="glass rounded-2xl border border-zinc-800/60 p-12 flex flex-col items-center text-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center">
-            <TicketIcon className="w-8 h-8 text-brand" />
+        <div className="glass rounded-2xl border border-white/10 p-12 flex flex-col items-center text-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-violet-500/20 border border-fuchsia-500/30 flex items-center justify-center">
+            <TicketIcon className="w-8 h-8 text-fuchsia-400" />
           </div>
           <div>
             <p className="text-white font-bold">

@@ -1,19 +1,33 @@
 /* Theme CSS Custom Properties */
 
-/* Default Theme (Vibrant Green / Emerald Variant) */
+/* Default Theme — "Festival Crypto" (Pink → Violet → Cyan) */
 :root {
-  --brand-primary: #10b981;       /* Emerald 500 */
-  --brand-primary-hover: #059669; /* Emerald 600 */
-  --brand-primary-glow: #10b9811a; /* Emerald 500 with 10% opacity */
-  --brand-gradient-start: #10b981;
-  --brand-gradient-end: #06b6d4;   /* Cyan 500 */
+  --brand-primary: #d946ef;       /* Fuchsia 500 */
+  --brand-primary-hover: #c026d3; /* Fuchsia 600 */
+  --brand-primary-glow: #d946ef1a; /* Fuchsia 500 with 10% opacity */
+  --brand-gradient-start: #ec4899; /* Pink 500 */
+  --brand-gradient-end: #8b5cf6;   /* Violet 500 */
+
+  /* Extended celebration + crypto accents */
+  --brand-pink: #ec4899;
+  --brand-fuchsia: #d946ef;
+  --brand-violet: #8b5cf6;
+  --brand-cyan: #22d3ee;
+  --brand-amber: #fbbf24;
+  --brand-rose: #fb7185;
 }
 
-/* Future Theme Switcher Support (Fuchsia Variant) */
-[data-theme="fuchsia"] {
-  --brand-primary: #d946ef;       /* Fuchsia 500 */
-  --brand-primary-hover: #c084fc; /* Fuchsia 400 */
-  --brand-primary-glow: #d946ef1a; /* Fuchsia 500 with 10% opacity */
-  --brand-gradient-start: #d946ef;
+/* Future Theme Switcher Support (Emerald Variant) */
+[data-theme="emerald"] {
+  --brand-primary: #10b981;       /* Emerald 500 */
+  --brand-primary-hover: #059669; /* Emerald 600 */
+  --brand-primary-glow: #10b9811a;
+  --brand-gradient-start: #34d399;
   --brand-gradient-end: #06b6d4;
+  --brand-pink: #f472b6;
+  --brand-fuchsia: #e879f9;
+  --brand-violet: #8b5cf6;
+  --brand-cyan: #06b6d4;
+  --brand-amber: #fbbf24;
+  --brand-rose: #fb7185;
 }

@@ -27,8 +27,8 @@ export default function DashboardLayout({
 
   if (!address) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="w-10 h-10 text-brand animate-spin" />
+      <div className="mesh-bg flex min-h-screen items-center justify-center">
+        <Loader2 className="w-10 h-10 text-fuchsia-500 animate-spin" />
       </div>
     );
   }

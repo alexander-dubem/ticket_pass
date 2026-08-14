@@ -40,12 +40,12 @@ export default function EventsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <Loader2 className="w-8 h-8 text-brand animate-spin" />
+          <Loader2 className="w-8 h-8 text-fuchsia-500 animate-spin" />
         </div>
       ) : events.length === 0 ? (
-        <div className="glass rounded-2xl border border-zinc-800/60 p-12 flex flex-col items-center text-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-brand/10 border border-brand/20 flex items-center justify-center">
-            <CalendarDays className="w-8 h-8 text-brand" />
+        <div className="glass rounded-2xl border border-white/10 p-12 flex flex-col items-center text-center gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/20 to-violet-500/20 border border-fuchsia-500/30 flex items-center justify-center">
+            <CalendarDays className="w-8 h-8 text-fuchsia-400" />
           </div>
           <div>
             <p className="text-white font-bold">No events yet</p>

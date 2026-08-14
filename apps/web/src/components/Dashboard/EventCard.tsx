@@ -4,10 +4,11 @@ import {
   CalendarDays,
   MapPin,
   Users,
-  Ticket,
   Globe,
   EyeOff,
   Pencil,
+  Coins,
+  Sparkle,
 } from "lucide-react";
 
 interface EventCardProps {
@@ -25,6 +26,14 @@ interface EventCardProps {
   };
 }
 
+const COVER_GRADIENTS = [
+  "from-rose-500 via-pink-500 to-fuchsia-500",
+  "from-violet-500 via-purple-500 to-cyan-400",
+  "from-amber-400 via-rose-500 to-pink-500",
+  "from-cyan-400 via-sky-500 to-violet-500",
+  "from-fuchsia-500 via-violet-500 to-indigo-500",
+];
+
 export const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const dateStr = new Date(event.date).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -35,11 +44,12 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
   const sold = event._count?.tickets ?? 0;
   const pctSold = Math.round((sold / event.capacity) * 100);
   const coverImg = event.images?.[0];
+  const grad = COVER_GRADIENTS[(sold + event.capacity) % COVER_GRADIENTS.length];
 
   return (
-    <div className="glass rounded-2xl border border-zinc-800/60 overflow-hidden hover:border-zinc-700/60 transition-all duration-200 group flex flex-col">
+    <div className="glass glass-hover rounded-2xl border border-white/10 overflow-hidden group flex flex-col">
       {/* Cover Image / Placeholder */}
-      <div className="h-36 bg-zinc-900 relative overflow-hidden shrink-0">
+      <div className="h-36 relative overflow-hidden shrink-0">
         {coverImg ? (
           <img
             src={coverImg}
@@ -47,16 +57,22 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-900 to-zinc-800">
-            <CalendarDays className="w-10 h-10 text-zinc-700" />
+          <div className={`w-full h-full bg-gradient-to-br ${grad} relative`}>
+            <div className="absolute inset-0 bg-grid opacity-40 mix-blend-overlay" />
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15 border border-white/25 backdrop-blur-sm">
+                <Sparkle className="w-6 h-6 text-white" />
+              </div>
+            </div>
           </div>
         )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         {/* Status Badge */}
         <div
-          className={`absolute top-3 right-3 flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+          className={`absolute top-3 right-3 flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border backdrop-blur-sm ${
             event.isPublished
-              ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
-              : "bg-zinc-700/50 border-zinc-600/40 text-zinc-400"
+              ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
+              : "bg-zinc-700/50 border-zinc-600/40 text-zinc-300"
           }`}
         >
           {event.isPublished ? (
@@ -70,7 +86,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
           )}
         </div>
         {event.category && (
-          <div className="absolute top-3 left-3 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brand/20 border border-brand/30 text-brand">
+          <div className="absolute top-3 left-3 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gradient-to-r from-pink-500 to-violet-500 text-white border border-white/20">
             {event.category}
           </div>
         )}
@@ -92,8 +108,8 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
             <span className="truncate">{event.location}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <Ticket className="w-3.5 h-3.5 shrink-0" />
-            <span>{event.price} XLM</span>
+            <Coins className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+            <span className="font-mono">{event.price} XLM</span>
           </div>
         </div>
 
@@ -104,11 +120,11 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
               <Users className="w-3 h-3" />
               {sold}/{event.capacity} sold
             </span>
-            <span>{pctSold}%</span>
+            <span className="text-gradient font-bold">{pctSold}%</span>
           </div>
-          <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+          <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
             <div
-              className="h-full bg-brand rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500 rounded-full transition-all duration-500"
               style={{ width: `${pctSold}%` }}
             />
           </div>
@@ -117,7 +133,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
         {/* Edit action */}
         <Link
           href={`/dashboard/events/${event.id}/edit`}
-          className="mt-1 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white bg-zinc-900/50 hover:bg-zinc-800/60 border border-zinc-800/60 hover:border-zinc-700 rounded-xl py-2 transition-all cursor-pointer"
+          className="mt-1 flex items-center justify-center gap-2 text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-fuchsia-400/40 rounded-xl py-2 transition-all cursor-pointer"
         >
           <Pencil className="w-3.5 h-3.5" />
           Edit Event

@@ -13,15 +13,23 @@ const badgeVariants = cva(
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
+        outline: "text-foreground border-white/12 bg-white/[0.03]",
         success:
-          "border-transparent bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+          "border-emerald-500/25 bg-emerald-500/10 text-emerald-300",
         cyan:
-          "border-transparent bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
+          "border-cyan-500/25 bg-cyan-500/10 text-cyan-300",
         fuchsia:
-          "border-transparent bg-fuchsia-500/10 text-fuchsia-400 border border-fuchsia-500/20",
+          "border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300",
         brand:
-          "border-transparent bg-brand/10 text-brand border border-brand/20",
+          "border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300",
+        gradient:
+          "border-transparent bg-gradient-to-r from-pink-500 to-violet-500 text-white",
+        gold:
+          "border-amber-400/25 bg-amber-400/10 text-amber-300",
+        pink:
+          "border-pink-500/25 bg-pink-500/10 text-pink-300",
+        violet:
+          "border-violet-500/25 bg-violet-500/10 text-violet-300",
       },
     },
     defaultVariants: {
