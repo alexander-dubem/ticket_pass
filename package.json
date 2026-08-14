@@ -9,6 +9,7 @@
     "lint": "turbo run lint"
   },
   "devDependencies": {
+    "dotenv-cli": "^7.4.4",
     "turbo": "^2.0.0",
     "typescript": "^5.4.0",
     "prettier": "^3.0.0"

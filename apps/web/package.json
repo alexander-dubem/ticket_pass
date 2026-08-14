@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 5000",
-    "build": "next build",
-    "start": "next start --port 5000",
+    "dev": "dotenv -e ../../.env -- next dev --port 5000",
+    "build": "dotenv -e ../../.env -- next build",
+    "start": "dotenv -e ../../.env -- next start --port 5000",
     "lint": "next lint"
   },
   "dependencies": {
