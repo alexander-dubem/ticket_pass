@@ -425,6 +425,18 @@ export default function HomePage() {
                 </Card>
               );
             })}
+            {events.length === 0 && (
+              <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 border border-white/20 backdrop-blur-sm mb-6">
+                  <Ticket className="w-9 h-9 text-white" />
+                </div>
+                <h3 className="text-2xl font-black text-white mb-2">No Active Drops Yet</h3>
+                <p className="text-sm text-zinc-400 max-w-md mb-6">
+                  TicketPass is preparing its first on-chain drops. Check back soon or follow us to be the first to mint.
+                </p>
+                <Badge variant="cyan" className="font-mono">STELLAR TESTNET</Badge>
+              </div>
+            )}
           </div>
         </section>
 
